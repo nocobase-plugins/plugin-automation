@@ -25,8 +25,6 @@ async function parseMarkdown(text: string): Promise<string> {
     marked.setOptions({
       breaks: true,         // 支持单个换行符转换为 <br>
       gfm: true,           // 启用 GitHub Flavored Markdown
-      headerIds: false,    // 禁用标题 ID 生成（避免冲突）
-      mangle: false,       // 禁用邮箱地址混淆
     });
     
     return marked.parse(text);

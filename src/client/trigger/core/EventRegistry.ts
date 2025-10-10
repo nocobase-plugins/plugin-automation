@@ -7,7 +7,7 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
-import { EventDefinition } from '../types';
+import { EventDefinition } from "./types";
 
 /**
  * 统一的自动化事件注册中心

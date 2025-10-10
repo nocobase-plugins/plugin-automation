@@ -24,6 +24,7 @@
     "react-i18next": "^11.15.1"
   },
   "peerDependencies": {
+    "@nocobase/plugin-workflow": "1.x",
     "@nocobase/client": "1.x",
     "@nocobase/server": "1.x",
     "@nocobase/test": "1.x"
