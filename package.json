@@ -1,0 +1,53 @@
+{
+  "name": "@nocobase/plugin-automation",
+  "version": "1.7.1",
+  "main": "dist/server/index.js",
+  "displayName": "Automation",
+  "displayName.zh-CN": "自动化插件",
+  "description": "Enterprise-grade automation plugin framework for NocoBase with trigger-executor-action workflow system",
+  "description.zh-CN": "基于NocoBase的企业级自动化插件框架，提供触发器-执行器-动作器工作流体系",
+  "homepage": "https://github.com/nocobase/nocobase/tree/main/packages/plugins/@nocobase/plugin-automation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nocobase/nocobase.git",
+    "directory": "packages/plugins/@nocobase/plugin-automation"
+  },
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "marked": "^9.1.6"
+  },
+  "devDependencies": {
+    "@ant-design/icons": "5.x",
+    "@formily/react": "2.x",
+    "antd": "5.x",
+    "react": "^18.2.0",
+    "react-i18next": "^11.15.1"
+  },
+  "peerDependencies": {
+    "@nocobase/client": "1.x",
+    "@nocobase/server": "1.x",
+    "@nocobase/test": "1.x"
+  },
+  "keywords": [
+    "nocobase",
+    "plugin",
+    "automation",
+    "workflow", 
+    "trigger",
+    "executor",
+    "action",
+    "event",
+    "framework",
+    "extensible"
+  ],
+  "author": "NocoBase Team",
+  "files": [
+    "dist",
+    "client.d.ts", 
+    "client.js",
+    "server.d.ts",
+    "server.js",
+    "README.md",
+    "README.zh-CN.md"
+  ]
+}

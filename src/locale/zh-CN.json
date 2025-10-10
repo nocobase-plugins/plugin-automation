@@ -1,0 +1,13 @@
+{
+    "Automation": "自动化",
+    "Configure Automation": "配置自动化",
+    "This component does not support any automation events": "此组件不支持任何自动化事件",
+    "Executor": "执行器",
+    "Actions": "动作器",
+    "Select Executor": "选择执行器",
+    "Please select an executor": "请选择一个执行器",
+    "Select Actions": "选择动作器",
+    "Please select an action": "请选择一个动作器",
+    "Action": "动作器",
+    "Add Action": "添加动作器"
+}
