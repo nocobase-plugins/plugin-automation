@@ -64,7 +64,7 @@ const GeneralActionComponent = (props) => {
     const title = compile(fieldSchema?.title) || t('Automation');
 
     const actionOnClick = (e) => {
-        trigger('onClick', {
+        trigger('', 'onClick', {
             rawEvent: e
         });
     };

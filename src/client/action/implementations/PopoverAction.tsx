@@ -32,6 +32,9 @@ document.addEventListener('mousemove', (e) => {
 
 // 存储最后一个活动输入元素
 let lastActiveInput = null;
+
+// 存储当前活跃的popover实例（全局只允许一个）
+let currentActivePopover: { element: HTMLElement; triggerId: string } | null = null;
 document.addEventListener('click', (e) => {
   // 记录事件元素（用于组件模式）
   if (e.target && e.target !== document && e.target !== document.body) {
@@ -66,12 +69,23 @@ export class PopoverAction extends BaseAction {
   label = '气泡提示';
   description = '在组件、光标或鼠标位置显示操作提示';
 
-
-
-
-
   execute(triggerParams: any, executorResult: any, context: ExecutionContext): void {
     if (!context) return;
+    
+    const triggerId = `${context.triggerId || 'default'}#${context.event}`;
+    
+    // 检查是否已有活跃的popover
+    if (currentActivePopover) {
+      if (currentActivePopover.triggerId === triggerId) {
+        // 同一个triggerId，直接返回不展示新的
+        console.log('Popover already active for same trigger:', triggerId, '- skipping new popover');
+        return;
+      } else {
+        // 不同triggerId，先移除当前的popover
+        console.log('Removing existing popover for trigger:', currentActivePopover.triggerId, 'to show new popover for:', triggerId);
+        this.removePopover(currentActivePopover.element, currentActivePopover.triggerId);
+      }
+    }
     
     // 优化：将 triggerParams 和 executorResult 合并到 context 中
     const enrichedContext: ExecutionContext = {
@@ -99,6 +113,9 @@ export class PopoverAction extends BaseAction {
     popover.style.position = 'fixed';
     popover.style.zIndex = '9999';
     popover.style.fontFamily = '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+    
+    // 将popover与triggerId关联
+    popover.dataset.triggerId = triggerId;
     
     // 主题样式配置
     const themes = {
@@ -227,19 +244,23 @@ export class PopoverAction extends BaseAction {
         closeButton.style.color = '#00000073';
       };
       closeButton.onclick = () => {
-        popover.remove();
+        this.removePopover(popover, triggerId);
       };
       popover.appendChild(closeButton);
     }
 
     // 添加到DOM
     document.body.appendChild(popover);
+    
+    // 记录当前活跃的popover
+    currentActivePopover = { element: popover, triggerId };
 
     // 根据位置配置设置位置
     this.setPopoverPosition(popover, position);
 
     // 添加调试信息
     console.log('Popover added to DOM:', {
+      triggerId,
       content,
       position,
       theme,
@@ -248,14 +269,92 @@ export class PopoverAction extends BaseAction {
       showCloseButton
     });
 
-    // 设置自动关闭
+    // 设置智能自动关闭（鼠标悬停时不关闭）
     if (autoClose && duration > 0) {
-      setTimeout(() => {
-        if (popover.parentNode) {
-          popover.remove();
-        }
-      }, duration);
+      this.setupSmartAutoClose(popover, triggerId, duration);
     }
+  }
+
+  /**
+   * 设置智能自动关闭（鼠标悬停时不关闭）
+   */
+  private setupSmartAutoClose(popover: HTMLElement, triggerId: string, duration: number): void {
+    let isMouseOver = false;
+    let autoCloseTimer: NodeJS.Timeout | null = null;
+    
+    // 鼠标进入popover
+    const handleMouseEnter = () => {
+      isMouseOver = true;
+      if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+        autoCloseTimer = null;
+        console.log('Auto-close paused: mouse entered popover');
+      }
+    };
+    
+    // 鼠标离开popover
+    const handleMouseLeave = () => {
+      isMouseOver = false;
+      // 鼠标离开后重新开始倒计时
+      this.startAutoCloseTimer(popover, triggerId, duration);
+      console.log('Auto-close resumed: mouse left popover');
+    };
+    
+    // 绑定鼠标事件
+    popover.addEventListener('mouseenter', handleMouseEnter);
+    popover.addEventListener('mouseleave', handleMouseLeave);
+    
+    // 存储清理函数到popover元素上，便于移除时清理
+    (popover as any)._cleanupAutoClose = () => {
+      if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+      }
+      popover.removeEventListener('mouseenter', handleMouseEnter);
+      popover.removeEventListener('mouseleave', handleMouseLeave);
+    };
+    
+    // 初始启动自动关闭定时器
+    this.startAutoCloseTimer(popover, triggerId, duration);
+  }
+  
+  /**
+   * 启动自动关闭定时器
+   */
+  private startAutoCloseTimer(popover: HTMLElement, triggerId: string, duration: number): void {
+    const timer = setTimeout(() => {
+      // 检查popover是否还存在且鼠标不在其上
+      if (popover.parentNode && !popover.matches(':hover')) {
+        this.removePopover(popover, triggerId);
+      }
+    }, duration);
+    
+    // 存储timer到popover元素上
+    (popover as any)._autoCloseTimer = timer;
+  }
+
+  /**
+   * 安全移除popover并清理记录
+   */
+  private removePopover(popover: HTMLElement, triggerId: string): void {
+    // 清理自动关闭相关的定时器和事件监听器
+    if ((popover as any)._cleanupAutoClose) {
+      (popover as any)._cleanupAutoClose();
+    }
+    if ((popover as any)._autoCloseTimer) {
+      clearTimeout((popover as any)._autoCloseTimer);
+    }
+    
+    // 从DOM中移除
+    if (popover.parentNode) {
+      popover.remove();
+    }
+    
+    // 清理全局记录
+    if (currentActivePopover && currentActivePopover.element === popover) {
+      currentActivePopover = null;
+    }
+    
+    console.log('Popover removed for trigger:', triggerId);
   }
   
   /**

@@ -86,6 +86,7 @@ const TableOpActionComponent: TableOpActionComponentType = (props) => {
     const { designable } = useDesignable?.() || {};
     const { t } = useTranslation(NAMESPACE);
     const { trigger } = useAutomation();
+    const field = useField();
     const record = useCollectionRecord();
     const fieldSchema = useFieldSchema();
     const compile = useCompile();
@@ -94,18 +95,25 @@ const TableOpActionComponent: TableOpActionComponentType = (props) => {
     const title = compile(fieldSchema?.title) || t('Automation');
 
     const actionOnClick = (e) => {
-        trigger('onClick', {
+        trigger(`${fieldSchema['x-uid']}#${record.data?.['id']}`, 'onClick', {
             rawEvent: e,
             record,
         });
     };
 
+    const actionOnMouseEnter = (e) => {
+        trigger(`${fieldSchema['x-uid']}#${record.data?.['id']}`, 'onMouseEnter', {
+            rawEvent: e,
+            record,
+        });
+    }
+
     if (designable) {
         // In designer mode, use standard Actions while retaining the editing capability
-        return <Action.Link {...props} type={'link'} title={title} onClick={actionOnClick}></Action.Link>;
+        return <Action.Link {...props} type={'link'} title={title} onClick={actionOnClick} onMouseEnter={actionOnMouseEnter}></Action.Link>;
     } else {
         // In non-designer mode, use typography link for better display
-        return <Typography.Link onClick={actionOnClick}>{title}</Typography.Link>;
+        return <Typography.Link onClick={actionOnClick} onMouseEnter={actionOnMouseEnter}>{title}</Typography.Link>;
     }
 };
 
@@ -115,6 +123,11 @@ registerAutomationEvents('TableOpActionComponent', [
         key: 'onClick',
         label: '点击时',
         description: '当按钮被点击时触发'
+    },
+    {
+        key: 'onMouseEnter',
+        label: '鼠标悬停时',
+        description: '当鼠标悬停在按钮上时触发'
     }
 ]);
 

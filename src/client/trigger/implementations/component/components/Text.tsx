@@ -25,7 +25,7 @@ const TextEditable: FC<any> = ({ value, disabled, onChange, ...otherProps }) => 
 
         // Set new timer with 300ms delay
         debounceTimerRef.current = setTimeout(() => {
-            trigger('onChange', {
+            trigger('', 'onChange', {
                 rawEvent: e,
                 value: e.target.value
             });

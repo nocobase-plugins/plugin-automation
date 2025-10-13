@@ -23,7 +23,7 @@ const SelectEditable: FC<any> = ({ value, disabled, onChange, ...otherProps }) =
         options={options}
         disabled={disabled}
         onChange={(value) => {
-            trigger('onChange', {
+            trigger('', 'onChange', {
                 rawEvent: null,
                 value
             });

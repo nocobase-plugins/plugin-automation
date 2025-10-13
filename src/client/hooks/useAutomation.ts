@@ -17,7 +17,6 @@ import { createExecutionContext } from '../core/context';
 import { executorRegistry } from '../executor';
 import { actionRegistry } from '../action';
 import { AutomationConfig, EventConfig } from '../core/types';
-import { SETTINGS_KEY } from '../constant';
 
 /**
  * 自动化核心Hook
@@ -45,7 +44,7 @@ export const useAutomation = () => {
   /**
    * 触发自动化流程
    */
-  const trigger = useCallback(async (eventKey: string, eventData: any) => {
+  const trigger = useCallback(async (triggerId: string, eventKey: string, eventData: any) => {
     console.log(`Triggering automation for event: ${eventKey}`, eventData);
     
     // 获取该事件的配置
@@ -59,6 +58,7 @@ export const useAutomation = () => {
       // 创建执行上下文
       const context = createExecutionContext(eventKey, eventData, {
         form,
+        triggerId,
         fieldSchema,
         componentName: fieldComponentName,
         timestamp: new Date(),
