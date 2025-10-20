@@ -17,6 +17,7 @@ import { createExecutionContext } from '../core/context';
 import { executorRegistry } from '../executor';
 import { actionRegistry } from '../action';
 import { AutomationConfig, EventConfig } from '../core/types';
+import { useParameterCollectorGlobal } from '../components/AutomationProvider';
 
 /**
  * 自动化核心Hook
@@ -28,6 +29,7 @@ export const useAutomation = () => {
   const fieldComponentName = useFieldComponentName();
   const components = useContext(SchemaComponentsContext);
   const apiClient = useAPIClient();
+  const parameterCollector = useParameterCollectorGlobal();
   
   // 获取组件类
   const componentClass = FormPath.getIn(components, fieldComponentName) as any;
@@ -63,6 +65,21 @@ export const useAutomation = () => {
         componentName: fieldComponentName,
         timestamp: new Date(),
       });
+
+      // 参数构造器阶段 - 在执行器之前收集用户参数
+      if (eventConfig.parameterBuilder?.fields && eventConfig.parameterBuilder.fields.length > 0) {
+        console.log('参数构造器已启用，配置:', eventConfig.parameterBuilder);
+        
+        try {
+          const modalTitle = eventConfig.parameterBuilder.title || '请输入执行参数';
+          const userParams = await parameterCollector.showModal(modalTitle, eventConfig.parameterBuilder.fields);
+          console.log('用户输入的参数:', userParams);
+          context.userParams = userParams;
+        } catch (error) {
+          console.log('用户取消了参数输入');
+          return; // 用户取消，中断执行流程
+        }
+      }
 
       // 执行器结果
       let executorResult = null;

@@ -141,6 +141,169 @@ export function Configuration() {
                       [`eventConfig_${event.key}`]: {
                         type: 'object',
                         properties: {
+                          // 参数构造器配置区域
+                          parameterBuilderSection: {
+                            type: 'void',
+                            'x-component': 'Card',
+                            'x-component-props': {
+                              title: '参数构造器',
+                              size: 'small',
+                              style: { 
+                                marginBottom: 24,
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                              },
+                            },
+                            properties: {
+                              [`parameterBuilderFields_${event.key}`]: {
+                                type: 'array',
+                                title: '参数构造器',
+                                'x-decorator': 'FormItem',
+                                'x-decorator-props': {
+                                  style: { marginTop: 8 },
+                                },
+                                'x-component': 'ArrayItems',
+                                'x-component-props': {
+                                  style: { 
+                                    width: '100%',
+                                    '.ant-formily-array-items-item': {
+                                      marginBottom: '16px',
+                                    },
+                                  },
+                                },
+                                items: {
+                                  type: 'object',
+                                  'x-component': 'div',
+                                  'x-component-props': {
+                                    style: { 
+                                      marginBottom: 8,
+                                      padding: 16,
+                                      border: '1px solid #e8e8e8',
+                                      borderRadius: 6,
+                                      backgroundColor: '#fafafa',
+                                    },
+                                  },
+                                  properties: {
+                                    space: {
+                                      type: 'void',
+                                      'x-component': 'Space',
+                                      'x-component-props': {
+                                        style: { display: 'flex', alignItems: 'center', width: '100%' },
+                                      },
+                                      properties: {
+                                        sort: {
+                                          type: 'void',
+                                          'x-component': 'ArrayItems.SortHandle',
+                                        },
+                                        fieldLabelText: {
+                                          type: 'void',
+                                          'x-component': 'span',
+                                          'x-content': '字段:',
+                                          'x-component-props': {
+                                            style: { 
+                                              marginRight: 8,
+                                              fontWeight: 500,
+                                              color: '#262626',
+                                              lineHeight: '32px',
+                                            },
+                                          },
+                                        },
+                                        fieldLabel: {
+                                          type: 'string',
+                                          'x-decorator': 'FormItem',
+                                          'x-decorator-props': {
+                                            style: { marginBottom: 0 },
+                                          },
+                                          'x-component': 'Input',
+                                          'x-component-props': {
+                                            placeholder: '字段标签',
+                                            style: { minWidth: 120 },
+                                          },
+                                        },
+                                        fieldKeyText: {
+                                          type: 'void',
+                                          'x-component': 'span',
+                                          'x-content': 'Key:',
+                                          'x-component-props': {
+                                            style: { 
+                                              marginLeft: 16,
+                                              marginRight: 8,
+                                              fontWeight: 500,
+                                              color: '#262626',
+                                              lineHeight: '32px',
+                                            },
+                                          },
+                                        },
+                                        fieldKey: {
+                                          type: 'string',
+                                          'x-decorator': 'FormItem',
+                                          'x-decorator-props': {
+                                            style: { marginBottom: 0 },
+                                          },
+                                          'x-component': 'Input',
+                                          'x-component-props': {
+                                            placeholder: '字段Key',
+                                            style: { minWidth: 120 },
+                                          },
+                                        },
+                                        fieldTypeText: {
+                                          type: 'void',
+                                          'x-component': 'span',
+                                          'x-content': '类型:',
+                                          'x-component-props': {
+                                            style: { 
+                                              marginLeft: 16,
+                                              marginRight: 8,
+                                              fontWeight: 500,
+                                              color: '#262626',
+                                              lineHeight: '32px',
+                                            },
+                                          },
+                                        },
+                                        fieldType: {
+                                          type: 'string',
+                                          'x-decorator': 'FormItem',
+                                          'x-decorator-props': {
+                                            style: { marginBottom: 0 },
+                                          },
+                                          'x-component': 'Select',
+                                          'x-component-props': {
+                                            style: { minWidth: 120 },
+                                          },
+                                          enum: [
+                                            { label: '单行文本', value: 'input' },
+                                            { label: '多行文本', value: 'textarea' },
+                                            { label: '数字', value: 'number' },
+                                            { label: '开关', value: 'switch' },
+                                          ],
+                                          default: 'input',
+                                        },
+                                        remove: {
+                                          type: 'void',
+                                          'x-component': 'ArrayItems.Remove',
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                                properties: {
+                                  add: {
+                                    type: 'void',
+                                    title: '添加参数字段',
+                                    'x-component': 'ArrayItems.Addition',
+                                    'x-component-props': {
+                                      type: 'dashed',
+                                      block: true,
+                                      size: 'large',
+                                      style: {
+                                        borderColor: '#52c41a',
+                                        color: '#52c41a',
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
                           // 执行器选择区域
                           executorSection: {
                             type: 'void',
@@ -158,6 +321,9 @@ export function Configuration() {
                                 type: 'string',
                                 title: t('Select Executor', { ns: NAMESPACE }),
                                 'x-decorator': 'FormItem',
+                                'x-decorator-props': {
+                                  style: { marginBottom: 8 },
+                                },
                                 'x-component': 'Select',
                                 'x-component-props': {
                                   placeholder: t('Please select an executor', { ns: NAMESPACE }),
@@ -213,7 +379,7 @@ export function Configuration() {
                                   'x-component': 'div',
                                   'x-component-props': {
                                     style: { 
-                                      marginBottom: 16,
+                                      marginBottom: 8,
                                       padding: 16,
                                       border: '1px solid #e8e8e8',
                                       borderRadius: 6,
@@ -288,7 +454,6 @@ export function Configuration() {
                                       block: true,
                                       size: 'large',
                                       style: {
-                                        marginTop: 16,
                                         borderColor: '#52c41a',
                                         color: '#52c41a',
                                       },
@@ -326,12 +491,28 @@ export function Configuration() {
         componentEvents.forEach(event => {
           const eventConfig = currentConfig.eventConfigs[event.key];
           
-          console.log(`Event ${event.key} config:`, eventConfig);
+          console.log(`=== 处理事件 ${event.key} ===`);
+          console.log(`Event ${event.key} config:`, JSON.stringify(eventConfig, null, 2));
           
           // 初始化事件配置对象
           initialValues[`eventConfig_${event.key}`] = {};
           
           if (eventConfig) {
+            // 参数构造器配置
+            if (eventConfig.parameterBuilder && eventConfig.parameterBuilder.fields) {
+              console.log(`原始参数构造器字段:`, JSON.stringify(eventConfig.parameterBuilder.fields, null, 2));
+              // 将保存的字段数据映射回表单字段名称
+              const formFields = eventConfig.parameterBuilder.fields.map((field: any) => ({
+                fieldLabel: field.label || '',
+                fieldKey: field.key || '',
+                fieldType: field.type || 'input',
+              }));
+              initialValues[`eventConfig_${event.key}`][`parameterBuilderFields_${event.key}`] = formFields;
+              console.log(`设置参数构造器配置:`, eventConfig.parameterBuilder);
+              console.log(`映射后的表单字段:`, JSON.stringify(formFields, null, 2));
+              console.log(`最终设置的表单路径: eventConfig_${event.key}.parameterBuilderFields_${event.key}`);
+            }
+
             // 执行器配置 - 从 params 字段中恢复配置
             if (eventConfig.executor) {
               console.log(`读取保存的执行器数据:`, JSON.stringify(eventConfig.executor, null, 2));
@@ -378,6 +559,21 @@ export function Configuration() {
           
           console.log(`事件 ${event.key} 的表单值:`, JSON.stringify(eventValues, null, 2));
           
+          // 处理参数构造器配置
+          const parameterBuilderFields = eventValues[`parameterBuilderFields_${event.key}`] || [];
+          if (parameterBuilderFields.length > 0) {
+            console.log(`参数构造器字段配置:`, parameterBuilderFields);
+            eventConfig.parameterBuilder = {
+              fields: parameterBuilderFields.map((field: any) => ({
+                label: field.fieldLabel || '',
+                key: field.fieldKey || '',
+                type: field.fieldType || 'input',
+                required: false,
+              })),
+              title: '请输入执行参数',
+            };
+          }
+          
           // 处理执行器 - 使用不同的字段名避免被过滤
           const executorKey = eventValues[`executor_${event.key}`];
           if (executorKey) {
@@ -404,8 +600,8 @@ export function Configuration() {
             });
           }
           
-          // 只有配置了执行器或动作器的事件才保存
-          if (eventConfig.executor || (eventConfig.actions && eventConfig.actions.length > 0)) {
+          // 只有配置了参数构造器、执行器或动作器的事件才保存
+          if (eventConfig.parameterBuilder || eventConfig.executor || (eventConfig.actions && eventConfig.actions.length > 0)) {
             automationConfig.eventConfigs[event.key] = eventConfig;
           }
         });
@@ -476,7 +672,6 @@ export const ExecutorConfigRenderer: React.FC<{ eventKey: string }> = observer((
   return (
     <div 
       style={{ 
-        marginTop: 16, 
         padding: 16, 
         backgroundColor: '#f8f9fa',
         border: '1px solid #dee2e6', 

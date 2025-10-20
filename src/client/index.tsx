@@ -11,6 +11,8 @@ import { Plugin } from '@nocobase/client';
 import { initialTrigger } from './trigger/setup';
 import { AutomationManager } from './AutomationManager';
 import { ActionConfigRenderer, ExecutorConfigRenderer } from './Configuration';
+import { ParameterCollectorModal } from './components/ParameterCollectorModal';
+import { AutomationProvider } from './components/AutomationProvider';
 
 // 导出核心模块，方便外部扩展
 export * from './core';
@@ -37,7 +39,12 @@ export class PluginAutomation extends Plugin {
     this.app.addComponents({
       ExecutorConfigRenderer,
       ActionConfigRenderer,
+      ParameterCollectorModal,
+      AutomationProvider,
     });
+    
+    // 添加全局Provider
+    this.app.addProvider(AutomationProvider);
   }
 
   /**
