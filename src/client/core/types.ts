@@ -116,11 +116,13 @@ export interface EventConfig {
   executors?: Array<{
     key: string;
     params?: any;
+    enabled?: boolean; // 是否启用，默认true
   }>;
   /** 动作器配置列表 */
   actions: Array<{
     key: string;
     params?: any;
+    enabled?: boolean; // 是否启用，默认true
   }>;
 }
 

@@ -7,9 +7,4 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
-export * from './ConsoleAction';
-export * from './MessageAction';
-export { PopoverAction } from './PopoverAction';
-export { ModalAction } from './ModalAction';
-export { FormValueSetterAction } from './FormValueSetterAction';
-export { ClipboardWriteAction } from './clipboard-write';
+export * from './ClipboardWriteAction';

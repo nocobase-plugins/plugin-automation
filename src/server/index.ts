@@ -10,6 +10,7 @@
 import { Plugin } from '@nocobase/server';
 import WorkflowPlugin, { Processor } from '@nocobase/plugin-workflow';
 import axios from 'axios';
+import { requestTemplateGenerator, RequestConfig } from './utils/request-template-generator';
 
 const fetchDataFromLocalSQL = async (ctx, next, sql) => {
   if (!sql) {
@@ -42,12 +43,54 @@ const fetchDataFromLocalSQL = async (ctx, next, sql) => {
 
 const fetchDataFromRemoteAPI = async (ctx, next, data) => {
   try {
-    let { url, headers = {}, method = 'get', query = {}, body = {}, params = {}, timeout = 5000 } = data || {};
+    let { 
+      url, 
+      headers = {}, 
+      method = 'get', 
+      query = {}, 
+      body = {}, 
+      params = {}, 
+      timeout = 5000,
+      outputMode = 'execute' 
+    } = data || {};
     
     if (!url) {
       ctx.throw(400, 'URL is required');
     }
     
+    // 如果是模板生成模式，生成代码模板而不是执行请求
+    if (outputMode !== 'execute') {
+      const requestConfig: RequestConfig = {
+        url,
+        method: method.toUpperCase(),
+        headers,
+        query: { ...query, ...params }, // 合并 query 和 params 参数
+        body,
+        timeout
+      };
+      
+      try {
+        const template = requestTemplateGenerator.generateTemplate(outputMode, requestConfig, {
+          includeComments: true,
+          language: 'zh-CN'
+        });
+        
+        ctx.body = { 
+          success: true,
+          mode: 'template',
+          format: outputMode,
+          template,
+          originalConfig: requestConfig
+        };
+        
+        await next();
+        return;
+      } catch (error) {
+        ctx.throw(400, `Template generation failed: ${error.message}`);
+      }
+    }
+    
+    // 原有的执行逻辑
     // 合并 query 和 params 参数
     const queryParams = { ...query, ...params };
     // 提取并处理 Basic Auth

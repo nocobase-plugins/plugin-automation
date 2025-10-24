@@ -12,7 +12,7 @@ import { FormPath } from '@formily/shared';
 import { SchemaSettingsActionModalItem, useDesignable, useFieldComponentName, Tabs } from '@nocobase/client';
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Space } from 'antd';
+import { Alert, Space, Switch } from 'antd';
 import { ArrayItems } from '@formily/antd-v5';
 import { NAMESPACE, SETTINGS_KEY } from './constant';
 import { EventDefinition } from './core/types';
@@ -225,6 +225,19 @@ export function Configuration() {
                                           })),
                                           required: true,
                                         },
+                                        enabled: {
+                                          type: 'boolean',
+                                          title: '启用',
+                                          'x-decorator': 'FormItem',
+                                          'x-decorator-props': {
+                                            style: { marginBottom: 0, marginLeft: 8 },
+                                          },
+                                          'x-component': 'Switch',
+                                          'x-component-props': {
+                                            size: 'small',
+                                          },
+                                          default: true,
+                                        },
                                         remove: {
                                           type: 'void',
                                           'x-component': 'ArrayItems.Remove',
@@ -344,6 +357,19 @@ export function Configuration() {
                                           })),
                                           required: true,
                                         },
+                                        enabled: {
+                                          type: 'boolean',
+                                          title: '启用',
+                                          'x-decorator': 'FormItem',
+                                          'x-decorator-props': {
+                                            style: { marginBottom: 0, marginLeft: 8 },
+                                          },
+                                          'x-component': 'Switch',
+                                          'x-component-props': {
+                                            size: 'small',
+                                          },
+                                          default: true,
+                                        },
                                         remove: {
                                           type: 'void',
                                           'x-component': 'ArrayItems.Remove',
@@ -421,6 +447,7 @@ export function Configuration() {
               const executorItems = eventConfig.executors.map((executor: any) => ({
                 key: executor.key,
                 params: executor.params || {},
+                enabled: executor.enabled !== undefined ? executor.enabled : true, // 默认启用
               }));
               
               initialValues[`eventConfig_${event.key}`][`executors_${event.key}`] = executorItems;
@@ -436,6 +463,7 @@ export function Configuration() {
                 return {
                   actionKey: action.key,
                   actionConfig: actionConfig,
+                  enabled: action.enabled !== undefined ? action.enabled : true, // 默认启用
                 };
               });
               console.log(`设置动作器配置:`, eventConfig.actions);
@@ -468,6 +496,7 @@ export function Configuration() {
             eventConfig.executors = executors.map((executorItem: any) => ({
               key: executorItem.key,
               params: executorItem.params || {},
+              enabled: executorItem.enabled !== undefined ? executorItem.enabled : true, // 默认启用
             }));
           }
           
@@ -481,6 +510,7 @@ export function Configuration() {
                 key: actionItem.actionKey,
                 // 尝试使用不同的字段名
                 params: actionItem.actionConfig || {},
+                enabled: actionItem.enabled !== undefined ? actionItem.enabled : true, // 默认启用
               };
             });
           }
@@ -513,6 +543,7 @@ export function Configuration() {
         Alert,
         ArrayItems,
         Space,
+        Switch,
         Tabs,
         ExecutorConfigRenderer,
         ActionConfigRenderer,

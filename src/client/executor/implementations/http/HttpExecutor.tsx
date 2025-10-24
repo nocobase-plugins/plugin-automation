@@ -49,7 +49,8 @@ export class HttpExecutor extends BaseExecutor {
       params = [],
       data = '',
       timeout = 5000,
-      responseType = 'json'
+      responseType = 'json',
+      outputMode = 'execute'
     } = config;
 
     // 构建请求配置（配置已通过compile处理过变量替换）
@@ -59,6 +60,7 @@ export class HttpExecutor extends BaseExecutor {
       headers: this.buildHeaders(headers),
       params: this.buildParams(params),
       timeout,
+      outputMode
     };
 
     // 如果是需要 body 的方法，添加请求体
@@ -90,7 +92,8 @@ export class HttpExecutor extends BaseExecutor {
               headers: this.buildHeaders(headers),
               params: this.buildParams(params),
               body: data,
-              timeout
+              timeout,
+              outputMode
             }
           }
         }
@@ -198,6 +201,29 @@ export class HttpExecutor extends BaseExecutor {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* 执行模式 */}
+        <div>
+          <div style={{ marginBottom: 8, fontSize: '12px', color: '#666' }}>
+            执行模式 <span style={{ color: '#ff4d4f' }}>*</span>
+          </div>
+          <Select
+            style={{ width: '100%' }}
+            value={currentValue.outputMode || 'execute'}
+            onChange={(val) => handleChange('outputMode', val)}
+            options={[
+              { label: '立即执行 HTTP 请求', value: 'execute' },
+              { label: '生成 cURL 命令', value: 'curl' },
+              { label: '生成 PowerShell 脚本', value: 'powershell' },
+              { label: '生成 Python 代码', value: 'python' },
+              { label: '生成 JavaScript 代码', value: 'javascript' },
+              { label: '生成 Java 代码', value: 'java' },
+            ]}
+          />
+          <div style={{ fontSize: '11px', color: '#999', marginTop: 4 }}>
+            选择"立即执行"将发送真实的HTTP请求，选择"生成代码"将创建对应格式的代码模板
+          </div>
+        </div>
+
         {/* HTTP 方法 */}
         <div>
           <div style={{ marginBottom: 8, fontSize: '12px', color: '#666' }}>

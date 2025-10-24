@@ -15,7 +15,7 @@ export * from './implementations';
 
 // 注册默认动作器并导出注册中心
 import { actionRegistry } from './core/registry';
-import { ConsoleAction, MessageAction, PopoverAction, ModalAction, FormValueSetterAction } from './implementations';
+import { ConsoleAction, MessageAction, PopoverAction, ModalAction, FormValueSetterAction, ClipboardWriteAction } from './implementations';
 
 // 注册默认动作器
 actionRegistry.register(new ConsoleAction());
@@ -23,5 +23,6 @@ actionRegistry.register(new MessageAction());
 actionRegistry.register(new PopoverAction());
 actionRegistry.register(new ModalAction());
 actionRegistry.register(new FormValueSetterAction());
+actionRegistry.register(new ClipboardWriteAction());
 
 export { actionRegistry };

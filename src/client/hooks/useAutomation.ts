@@ -75,6 +75,24 @@ export const useAutomation = () => {
           const executorConfig = eventConfig.executors[i];
           console.log(`执行执行器 ${i + 1}/${eventConfig.executors.length}: ${executorConfig.key}`, executorConfig.params);
           
+          // 检查执行器是否被禁用
+          if (executorConfig.enabled === false) {
+            console.log(`执行器 ${executorConfig.key} 已禁用，跳过执行，保持索引 ${i}`);
+            // 添加占位结果以保持索引不变
+            executors.push({
+              success: false,
+              disabled: true,
+              message: `执行器 ${executorConfig.key} 已禁用`,
+              executedAt: new Date(),
+              executorKey: executorConfig.key,
+              metadata: {
+                disabled: true,
+                index: i
+              }
+            });
+            continue;
+          }
+          
           try {
             // 将配置参数和之前执行器的结果都添加到上下文中
             const executorContext = {
@@ -130,6 +148,13 @@ export const useAutomation = () => {
         
         for (const actionConfig of eventConfig.actions) {
           console.log(`Executing action: ${actionConfig.key}`, actionConfig.params);
+          
+          // 检查动作器是否被禁用
+          if (actionConfig.enabled === false) {
+            console.log(`动作器 ${actionConfig.key} 已禁用，跳过执行`);
+            continue;
+          }
+          
           // 统一的action上下文，只包含executors数组
           const actionContext = {
             ...context,
