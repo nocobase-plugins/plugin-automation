@@ -7,8 +7,4 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
-export * from './echo';
-export * from './http';
-export * from './parameter-builder';
-export * from './script';
-export * from './data-query';
+export { ParameterBuilderExecutor } from './ParameterBuilderExecutor';

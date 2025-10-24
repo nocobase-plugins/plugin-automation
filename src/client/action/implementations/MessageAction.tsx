@@ -25,16 +25,15 @@ export class MessageAction extends BaseAction {
   /**
    * 执行消息提示
    */
-  async execute(triggerParams: any, executorResult: any, context: ExecutionContext): Promise<void> {
-    // 优化：将 triggerParams 和 executorResult 合并到 context 中
+  async execute(trigger: any, context: ExecutionContext): Promise<void> {
+    // 统一的上下文，使用标准字段名
     const enrichedContext = {
       ...context,
-      triggerParams,
-      executor: executorResult
+      trigger
     };
 
     // 从 context.values 获取配置值
-    const { type = 'info', duration = 3, contentType = 'text', content = '', contentFunction = '' } = context.values || {};
+    const { type = 'info', duration = 3, contentType = 'text', content = '', contentFunction = '' } = context.config || {};
 
     // 构建内容配置
     const contentConfig: ContentConfig = {

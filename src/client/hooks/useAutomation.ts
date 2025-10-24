@@ -12,12 +12,12 @@ import { useContext, useCallback } from "react";
 import { useFieldComponentName, useAPIClient } from "@nocobase/client";
 import { SchemaComponentsContext } from "@formily/react";
 import { FormPath } from "@formily/shared";
+import { message } from "antd";
 
 import { createExecutionContext } from '../core/context';
 import { executorRegistry } from '../executor';
 import { actionRegistry } from '../action';
 import { AutomationConfig, EventConfig } from '../core/types';
-import { useParameterCollectorGlobal } from '../components/AutomationProvider';
 
 /**
  * 自动化核心Hook
@@ -29,7 +29,6 @@ export const useAutomation = () => {
   const fieldComponentName = useFieldComponentName();
   const components = useContext(SchemaComponentsContext);
   const apiClient = useAPIClient();
-  const parameterCollector = useParameterCollectorGlobal();
   
   // 获取组件类
   const componentClass = FormPath.getIn(components, fieldComponentName) as any;
@@ -66,39 +65,63 @@ export const useAutomation = () => {
         timestamp: new Date(),
       });
 
-      // 参数构造器阶段 - 在执行器之前收集用户参数
-      if (eventConfig.parameterBuilder?.fields && eventConfig.parameterBuilder.fields.length > 0) {
-        console.log('参数构造器已启用，配置:', eventConfig.parameterBuilder);
+      // 执行器链执行
+      let executors: any[] = [];
+      
+      if (eventConfig.executors && eventConfig.executors.length > 0) {
+        console.log(`执行${eventConfig.executors.length}个执行器`);
         
-        try {
-          const modalTitle = eventConfig.parameterBuilder.title || '请输入执行参数';
-          const userParams = await parameterCollector.showModal(modalTitle, eventConfig.parameterBuilder.fields);
-          console.log('用户输入的参数:', userParams);
-          context.userParams = userParams;
-        } catch (error) {
-          console.log('用户取消了参数输入');
-          return; // 用户取消，中断执行流程
+        for (let i = 0; i < eventConfig.executors.length; i++) {
+          const executorConfig = eventConfig.executors[i];
+          console.log(`执行执行器 ${i + 1}/${eventConfig.executors.length}: ${executorConfig.key}`, executorConfig.params);
+          
+          try {
+            // 将配置参数和之前执行器的结果都添加到上下文中
+            const executorContext = {
+              ...context,
+              config: executorConfig.params || {},
+              // 添加之前所有执行器的结果
+              executors,
+              // 添加当前执行器索引
+              executorIndex: i,
+              // 添加API客户端
+              apiClient,
+            };
+            
+            const result = await executorRegistry.execute(
+              executorConfig.key,
+              eventData,
+              executorContext,
+              apiClient
+            );
+            
+            executors.push(result);
+            
+            console.log(`执行器 ${executorConfig.key} 执行完成:`, result);
+            
+          } catch (error) {
+            console.error(`执行器 ${executorConfig.key} 执行失败:`, error);
+            // 根据需要决定是否中断执行链
+            if (executorConfig.key === 'parameter-builder') {
+              // 参数构造器失败（用户取消）则中断整个流程
+              if (error.name === 'ParameterCollectionCancelled') {
+                console.log('用户取消了参数输入，中断执行流程');
+              } else {
+                console.log('参数构造器执行失败，中断执行流程');
+                message.error('参数收集失败，自动化流程已中断');
+              }
+              return;
+            }
+            // 其他执行器失败则继续执行
+            message.error(`执行器 ${executorConfig.key} 执行失败: ${error.message}`);
+            executors.push({ 
+              success: false,
+              error: error.message,
+              executedAt: new Date(),
+              executorKey: executorConfig.key
+            });
+          }
         }
-      }
-
-      // 执行器结果
-      let executorResult = null;
-
-      // 执行执行器（如果配置了）
-      if (eventConfig.executor) {
-        console.log(`Executing executor: ${eventConfig.executor.key}`, eventConfig.executor.params);
-        // 将配置参数合并到上下文中，这样执行器可以访问它们
-        const executorContext = {
-          ...context,
-          config: eventConfig.executor.params || {}
-        };
-        executorResult = await executorRegistry.execute(
-          eventConfig.executor.key,
-          eventData,
-          executorContext,
-          apiClient
-        );
-        console.log(`Executor result:`, executorResult);
       }
 
       // 执行动作器列表
@@ -107,15 +130,15 @@ export const useAutomation = () => {
         
         for (const actionConfig of eventConfig.actions) {
           console.log(`Executing action: ${actionConfig.key}`, actionConfig.params);
-          // 将配置参数合并到上下文中，这样动作器可以访问它们
+          // 统一的action上下文，只包含executors数组
           const actionContext = {
             ...context,
-            config: actionConfig.params || {}
+            config: actionConfig.params || {},
+            executors, // 所有执行器的结果，按索引访问
           };
           await actionRegistry.execute(
             actionConfig.key,
             eventData,
-            executorResult,
             actionContext
           );
         }
@@ -124,6 +147,8 @@ export const useAutomation = () => {
       console.log(`Automation completed for event: ${eventKey}`);
     } catch (error) {
       console.error(`Automation failed for event: ${eventKey}`, error);
+      message.error(`自动化执行失败: ${error.message}`);
+      throw error; // 重新抛出异常，让触发器组件能够接收到
     }
   }, [automationConfig, form, fieldSchema, fieldComponentName]);
 

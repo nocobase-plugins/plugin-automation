@@ -59,22 +59,41 @@ const GeneralActionComponent = (props) => {
     const { trigger } = useAutomation();
     const fieldSchema = useFieldSchema();
     const compile = useCompile();
+    const [isExecuting, setIsExecuting] = useState(false);
 
     // 读取用户自定义的名称，如果没有则使用默认值
     const title = compile(fieldSchema?.title) || t('Automation');
 
-    const actionOnClick = (e) => {
-        trigger('', 'onClick', {
-            rawEvent: e
-        });
+    const actionOnClick = async (e) => {
+        if (isExecuting) return; // 防止重复触发
+        
+        setIsExecuting(true);
+        try {
+            console.log('开始执行自动化...');
+            await trigger('', 'onClick', {
+                rawEvent: e
+            });
+            console.log('自动化执行完成');
+        } catch (error) {
+            console.error('自动化执行失败:', error);
+        } finally {
+            console.log('恢复按钮状态');
+            setIsExecuting(false);
+        }
     };
+    
     if (designable) {
         // In the designer mode, use standard Actions while retaining the editing capability.
-        return <Action {...props} title={title} onClick={actionOnClick}></Action>;
+        return <Action {...props} title={title} onClick={actionOnClick} loading={isExecuting} disabled={isExecuting}></Action>;
     } else {
         // In non-designer mode, use buttons. Avoid the situation where the title of the Action becomes [object Object] after using custom components for the Action's title.
         return (
-            <Button onClick={actionOnClick} title={title}>
+            <Button 
+                onClick={actionOnClick} 
+                title={isExecuting ? '正在执行自动化...' : title} 
+                loading={isExecuting} 
+                disabled={isExecuting}
+            >
                 {title}
             </Button>
         );

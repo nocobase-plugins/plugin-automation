@@ -69,7 +69,7 @@ export class PopoverAction extends BaseAction {
   label = '气泡提示';
   description = '在组件、光标或鼠标位置显示操作提示';
 
-  execute(triggerParams: any, executorResult: any, context: ExecutionContext): void {
+  execute(trigger: any, context: ExecutionContext): void {
     if (!context) return;
     
     const triggerId = `${context.triggerId || 'default'}#${context.event}`;
@@ -90,12 +90,11 @@ export class PopoverAction extends BaseAction {
     // 优化：将 triggerParams 和 executorResult 合并到 context 中
     const enrichedContext: ExecutionContext = {
       ...context,
-      trigger: triggerParams,
-      executor: executorResult
+      trigger
     };
     
     // 从配置中获取参数，支持从多个来源获取
-    const config = context.config || executorResult?.popoverConfig || context.popoverConfig || {};
+    const config = context.config || {};
     const {
       content = '操作提示',
       contentType = 'text',
@@ -153,9 +152,9 @@ export class PopoverAction extends BaseAction {
 
     // 尺寸配置
     const sizes = {
-      small: { padding: '4px 8px', fontSize: '12px', minWidth: '80px', maxWidth: '200px' },
-      medium: { padding: '8px 12px', fontSize: '14px', minWidth: '120px', maxWidth: '300px' },
-      large: { padding: '12px 16px', fontSize: '16px', minWidth: '160px', maxWidth: '400px' }
+      small: { padding: '4px 8px', fontSize: '12px', minWidth: '80px', maxWidth: '400px' },
+      medium: { padding: '8px 12px', fontSize: '14px', minWidth: '120px', maxWidth: '600px' },
+      large: { padding: '12px 16px', fontSize: '16px', minWidth: '160px', maxWidth: '800px' }
     };
 
     const themeStyle = themes[theme] || themes.default;
@@ -176,12 +175,19 @@ export class PopoverAction extends BaseAction {
       lineHeight: '1.5',
       display: 'flex',
       alignItems: 'flex-start',
-      gap: '8px'
+      gap: '8px',
+      overflow: 'hidden',
+      boxSizing: 'border-box'
     });
 
     // 创建内容容器
     const contentDiv = document.createElement('div');
     contentDiv.style.flex = '1';
+    contentDiv.style.overflow = 'auto';
+    contentDiv.style.maxHeight = '400px'; // 限制最大高度，避免过高
+    contentDiv.style.wordBreak = 'break-all'; // 强制换行
+    contentDiv.style.overflowWrap = 'break-word'; // 强制换行
+    contentDiv.style.minWidth = '0'; // 允许 flex 子元素收缩
     
     // 构建内容配置并处理
     const contentConfig: ContentConfig = {
@@ -203,6 +209,15 @@ export class PopoverAction extends BaseAction {
           // 纯文本，保留换行
           contentDiv.innerHTML = contentResult.content.replace(/\n/g, '<br>');
         }
+        
+        // 简单处理表格，确保不溢出
+        const tables = contentDiv.querySelectorAll('table');
+        tables.forEach(table => {
+          (table as HTMLTableElement).style.tableLayout = 'fixed';
+          (table as HTMLTableElement).style.width = '100%';
+          (table as HTMLTableElement).style.wordBreak = 'break-all';
+        });
+        
       } catch (error: any) {
         // 处理错误
         contentDiv.innerHTML = `<div style="color: red;">渲染错误: ${error.message}</div>`;
@@ -471,13 +486,13 @@ export class PopoverAction extends BaseAction {
                 文本内容
               </div>
               <Input.TextArea
-                placeholder="支持变量替换：{{$trigger.data}}，{{$executor.success}}等"
+                placeholder="支持变量替换：{{$context.trigger.data}}，{{$context.executors[0].data.success}}等"
                 value={currentValue.content || ''}
                 onChange={(e) => handleChange('content', e.target.value)}
                 rows={2}
               />
               <div style={{ fontSize: '11px', color: '#999', marginTop: 4 }}>
-                变量语法：{`{{$trigger.*}}`} - 触发器数据，{`{{$executor.*}}`} - 执行器结果，{`{{$context.*}}`} - 执行上下文
+                变量语法：{`{{$context.trigger.*}}`} - 触发器数据，{`{{$context.executors[*].data.*}}`} - 执行器结果，{`{{$context.executors[*].data.*}}`} - 用户参数
               </div>
             </>
           ) : (

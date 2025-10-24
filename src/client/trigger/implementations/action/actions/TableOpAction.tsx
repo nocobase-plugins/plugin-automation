@@ -90,30 +90,79 @@ const TableOpActionComponent: TableOpActionComponentType = (props) => {
     const record = useCollectionRecord();
     const fieldSchema = useFieldSchema();
     const compile = useCompile();
+    const [isExecuting, setIsExecuting] = useState(false);
 
     // 读取用户自定义的名称，如果没有则使用默认值
     const title = compile(fieldSchema?.title) || t('Automation');
 
-    const actionOnClick = (e) => {
-        trigger(`${fieldSchema['x-uid']}#${record.data?.['id']}`, 'onClick', {
-            rawEvent: e,
-            record,
-        });
+    const actionOnClick = async (e) => {
+        if (isExecuting) return; // 防止重复触发
+        
+        setIsExecuting(true);
+        try {
+            await trigger(`${fieldSchema['x-uid']}#${record.data?.['id']}`, 'onClick', {
+                rawEvent: e,
+                record,
+            });
+        } catch (error) {
+            console.error('Automation execution failed:', error);
+        } finally {
+            setIsExecuting(false);
+        }
     };
 
-    const actionOnMouseEnter = (e) => {
-        trigger(`${fieldSchema['x-uid']}#${record.data?.['id']}`, 'onMouseEnter', {
-            rawEvent: e,
-            record,
-        });
+    const actionOnMouseEnter = async (e) => {
+        if (isExecuting) return; // 防止重复触发
+        
+        setIsExecuting(true);
+        try {
+            await trigger(`${fieldSchema['x-uid']}#${record.data?.['id']}`, 'onMouseEnter', {
+                rawEvent: e,
+                record,
+            });
+        } catch (error) {
+            console.error('Automation execution failed:', error);
+        } finally {
+            setIsExecuting(false);
+        }
     }
 
     if (designable) {
         // In designer mode, use standard Actions while retaining the editing capability
-        return <Action.Link {...props} type={'link'} title={title} onClick={actionOnClick} onMouseEnter={actionOnMouseEnter}></Action.Link>;
+        return (
+            <Action.Link 
+                {...props} 
+                type={'link'} 
+                title={isExecuting ? `${title} (执行中...)` : title}
+                onClick={isExecuting ? undefined : actionOnClick} 
+                onMouseEnter={isExecuting ? undefined : actionOnMouseEnter} 
+                disabled={isExecuting}
+                style={{ 
+                    opacity: isExecuting ? 0.6 : 1,
+                    cursor: isExecuting ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease'
+                }}
+            >
+            </Action.Link>
+        );
     } else {
         // In non-designer mode, use typography link for better display
-        return <Typography.Link onClick={actionOnClick} onMouseEnter={actionOnMouseEnter}>{title}</Typography.Link>;
+        return (
+            <Typography.Link 
+                onClick={isExecuting ? undefined : actionOnClick} 
+                onMouseEnter={isExecuting ? undefined : actionOnMouseEnter}
+                style={{ 
+                    opacity: isExecuting ? 0.4 : 1, 
+                    pointerEvents: isExecuting ? 'none' : 'auto',
+                    cursor: isExecuting ? 'not-allowed' : 'pointer',
+                    color: isExecuting ? '#ccc' : undefined,
+                    transition: 'all 0.2s ease'
+                }}
+                title={isExecuting ? '正在执行自动化...' : title}
+            >
+                {isExecuting ? `${title} (执行中...)` : title}
+            </Typography.Link>
+        );
     }
 };
 

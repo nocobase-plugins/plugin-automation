@@ -14,10 +14,18 @@ export * from './core';
 export * from './implementations';
 
 import { executorRegistry } from './core/registry';
-import { EchoExecutor, HttpExecutor } from './implementations';
+import { DataQueryExecutor } from './implementations/data-query';
+import { EchoExecutor } from './implementations/echo';
+import { HttpExecutor } from './implementations/http';
+import { ParameterBuilderExecutor } from './implementations/parameter-builder';
+import { ScriptExecutor } from './implementations/script';
 
-// 注册默认执行器
+// 注册所有执行器
 executorRegistry.register(new EchoExecutor());
+executorRegistry.register(new ParameterBuilderExecutor());
+executorRegistry.register(new ScriptExecutor());
+executorRegistry.register(new DataQueryExecutor());
 executorRegistry.register(new HttpExecutor());
 
+// 显式导出 executorRegistry 供其他插件使用
 export { executorRegistry };

@@ -9,28 +9,39 @@
 
 import { connect, mapReadPretty } from "@formily/react";
 import { Input } from "antd";
-import React, { FC, useCallback, useEffect, useRef } from "react";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useAutomation } from "../../../../hooks/useAutomation";
 
 const TextEditable: FC<any> = ({ value, disabled, onChange, ...otherProps }) => {
 
     const { trigger } = useAutomation();
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const [isExecuting, setIsExecuting] = useState(false);
 
-    const debouncedChange = useCallback((e) => {
+    const debouncedChange = useCallback(async (e) => {
+        // 如果正在执行自动化，跳过触发
+        if (isExecuting) return;
+        
         // Clear existing timer
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
         }
 
         // Set new timer with 300ms delay
-        debounceTimerRef.current = setTimeout(() => {
-            trigger('', 'onChange', {
-                rawEvent: e,
-                value: e.target.value
-            });
+        debounceTimerRef.current = setTimeout(async () => {
+            setIsExecuting(true);
+            try {
+                await trigger('', 'onChange', {
+                    rawEvent: e,
+                    value: e.target.value
+                });
+            } catch (error) {
+                console.error('Text automation execution failed:', error);
+            } finally {
+                setIsExecuting(false);
+            }
         }, 300);
-    }, [trigger, onChange]);
+    }, [trigger, onChange, isExecuting]);
 
     // Cleanup timer on unmount
     useEffect(() => {
@@ -43,10 +54,16 @@ const TextEditable: FC<any> = ({ value, disabled, onChange, ...otherProps }) => 
 
     return <Input
         value={value}
-        disabled={disabled}
+        disabled={disabled || isExecuting}
         onChange={(e) => {
             debouncedChange(e);
             onChange(e.target.value);
+        }}
+        placeholder={isExecuting ? '正在执行自动化...' : otherProps.placeholder}
+        style={{
+            ...otherProps.style,
+            opacity: isExecuting ? 0.7 : 1,
+            transition: 'opacity 0.2s ease'
         }}
         {...otherProps}
     />;

@@ -72,7 +72,7 @@ export class EchoExecutor extends BaseExecutor {
           自定义消息（支持变量）
         </div>
         <Input
-          placeholder="例如：触发数据：{{$trigger}}，系统时间：{{$system.timestamp}}"
+          placeholder="例如：触发数据：{{$context.trigger}}，系统时间：{{$context.timestamp}}"
           value={currentValue.message || ''}
           onChange={(e) => handleChange('message', e.target.value)}
         />
@@ -87,9 +87,9 @@ export class EchoExecutor extends BaseExecutor {
           fontSize: '12px'
         }}>
           <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>支持的变量：</div>
-          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$trigger}}'}</code> - 触发器传入的所有数据</div>
-          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$system.timestamp}}'}</code> - 当前时间戳</div>
-          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$utils.formatJSON($trigger)}}'}</code> - JSON格式化输出</div>
+          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$context.trigger}}'}</code> - 触发器传入的所有数据</div>
+          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$context.timestamp}}'}</code> - 当前时间戳</div>
+          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{JSON.stringify($context.trigger)}}'}</code> - JSON格式化输出</div>
         </div>
       </div>
     );

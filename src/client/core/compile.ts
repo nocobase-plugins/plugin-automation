@@ -13,12 +13,23 @@ import { ExecutionContext } from './types';
  * 编译上下文接口 - 用于变量替换的内部上下文
  */
 interface CompileContext {
-  /** 触发器数据 */
-  $trigger?: any;
-  /** 执行器结果 */
-  $executor?: any;
-  /** 执行上下文 */
-  $context?: any;
+  /** 统一的执行上下文 - 所有数据都在这里 */
+  $context: {
+    /** 触发器数据 */
+    trigger?: any;
+    /** 执行器结果数组 - 按索引访问 */
+    executors?: any[];
+    /** 动作配置 */
+    config?: any;
+    /** 执行时间戳 */
+    timestamp?: Date;
+    /** 事件名称 */
+    event?: string;
+    /** 原始事件对象 */
+    originalEvent?: any;
+    /** 其他自定义数据 */
+    [key: string]: any;
+  };
   /** 系统数据 */
   $system?: any;
   /** 实用工具 */
@@ -26,13 +37,81 @@ interface CompileContext {
 }
 
 /**
+ * 安全地序列化对象，移除循环引用和DOM元素
+ */
+function createSafeTriggerObject(originalEvent: any): any {
+  if (!originalEvent) return null;
+  
+  // 如果是Event对象，提取安全的属性
+  if (originalEvent.constructor && originalEvent.constructor.name.includes('Event')) {
+    return {
+      type: originalEvent.type,
+      timeStamp: originalEvent.timeStamp,
+      isTrusted: originalEvent.isTrusted,
+      // 对于鼠标事件
+      clientX: originalEvent.clientX,
+      clientY: originalEvent.clientY,
+      // 对于键盘事件
+      key: originalEvent.key,
+      code: originalEvent.code,
+      // 对于表单事件
+      value: originalEvent.target?.value,
+      // 其他安全属性
+      detail: originalEvent.detail,
+    };
+  }
+  
+  // 对于普通对象，递归过滤
+  if (typeof originalEvent === 'object' && originalEvent !== null) {
+    const safeObject: any = {};
+    for (const [key, value] of Object.entries(originalEvent)) {
+      // 跳过DOM相关属性和函数
+      if (
+        key.startsWith('__react') || 
+        key.startsWith('_') ||
+        typeof value === 'function' ||
+        value instanceof Node ||
+        value instanceof HTMLElement
+      ) {
+        continue;
+      }
+      
+      // 递归处理嵌套对象
+      if (typeof value === 'object' && value !== null) {
+        try {
+          // 尝试序列化来检测循环引用
+          JSON.stringify(value);
+          safeObject[key] = value;
+        } catch {
+          // 如果有循环引用，跳过该属性
+          continue;
+        }
+      } else {
+        safeObject[key] = value;
+      }
+    }
+    return safeObject;
+  }
+  
+  return originalEvent;
+}
+
+/**
  * 从ExecutionContext创建编译上下文
  */
 function createCompileContext(context: ExecutionContext): CompileContext {
   return {
-    $trigger: context.trigger,
-    $executor: context.executor,
-    $context: context,
+    // 统一的变量访问结构 - 所有数据都在 $context 下
+    $context: {
+      trigger: context.originalEvent,  // 将 originalEvent 作为 trigger 使用
+      executors: context.executors || [],
+      config: context.config,
+      timestamp: new Date(),
+      event: context.event,
+      originalEvent: context.originalEvent,
+      // 支持自定义扩展数据
+      ...context,
+    },
     $system: {
       timestamp: new Date().toISOString(),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -163,6 +242,13 @@ function evaluateExpression(expression: string, context: CompileContext): any {
     const contextKeys = Object.keys(safeContext);
     const contextValues = Object.values(safeContext);
     
+    // 调试信息
+    console.log('=== 编译器调试 ===');
+    console.log('Expression:', expression);
+    console.log('Context keys:', contextKeys);
+    console.log('$context:', safeContext.$context);
+    console.log('Executors array:', safeContext.$context?.executors);
+    
     // 创建函数来安全地评估表达式
     const func = new Function(
       ...contextKeys,
@@ -171,13 +257,16 @@ function evaluateExpression(expression: string, context: CompileContext): any {
         try {
           return ${expression};
         } catch (error) {
-          console.warn('Expression evaluation error:', expression, error);
+          console.warn('Expression evaluation error:', ${JSON.stringify(expression)}, error);
           return undefined;
         }
       `
     );
 
-    return func(...contextValues);
+    const result = func(...contextValues);
+    console.log('Expression result:', result);
+    console.log('================');
+    return result;
   } catch (error) {
     console.warn(`Failed to evaluate expression: ${expression}`, error);
     return undefined;

@@ -11,6 +11,7 @@ import React from 'react';
 import { Input, Switch } from 'antd';
 import { BaseAction } from '../core/base';
 import { ExecutionContext } from '../../core/types';
+import { ContentConfig, ContentRenderer } from '../../core';
 
 /**
  * 控制台打印 Action
@@ -24,23 +25,41 @@ export class ConsoleAction extends BaseAction {
   /**
    * 执行控制台打印
    */
-  execute(triggerParams: any, executorResult: any, context: ExecutionContext): void {
+  async execute(trigger: any, context: ExecutionContext): Promise<void> {
+    // 统一的上下文，只使用executors数组，trigger字段统一命名
+    const enrichedContext = {
+      ...context,
+      trigger  // 统一使用trigger字段名
+    };
+    
     // 支持从配置或多种来源获取要打印的内容
     const customMessage = context.config?.message;
     const showDetails = context.config?.showDetails !== false; // 默认显示详细信息
     
+    // 如果需要获取最后一个执行器的结果，使用executors数组
+    const lastExecutor = context.executors?.[context.executors.length - 1];
+    
     const message = customMessage || 
-                   executorResult?.message || 
+                   lastExecutor?.data?.message || 
+                   context?.message || 
+                   'Console Action Executed'; 
                    context?.message || 
                    'Console Action Executed';
+    // 构建内容配置
+    const contentConfig: ContentConfig = {
+      contentType: 'text',
+      content: message,
+      contentFunction: ''
+    };
+
+    // 处理内容配置
+    const contentResult = await ContentRenderer.processContent(contentConfig, enrichedContext);
     
     console.log('=== Console Action ===');
-    console.log('Message:', message);
+    console.log('Message:', contentResult.content);
     
     if (showDetails) {
-      console.log('Trigger Params:', triggerParams);
-      console.log('Executor Result:', executorResult);
-      console.log('Context:', context);
+      console.log('Unified Context:', enrichedContext);
     }
     
     console.log('===================');

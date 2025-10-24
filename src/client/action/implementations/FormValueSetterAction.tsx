@@ -31,18 +31,16 @@ export class FormValueSetterAction extends BaseAction {
   /**
    * 执行表单值设置
    */
-  execute(triggerParams: any, executorResult: any, context: ExecutionContext): void {
+  execute(trigger: any, context: ExecutionContext): void {
     // 优化：将 triggerParams 和 executorResult 合并到 context 中
     const enrichedContext: ExecutionContext = {
       ...context,
-      trigger: triggerParams,
-      executor: executorResult
+      trigger
     };
 
     if (process.env.NODE_ENV === 'development') {
       console.log('=== FormValueSetter Action ===');
-      console.log('Trigger Params:', triggerParams);
-      console.log('Executor Result:', executorResult);
+      console.log('Trigger Params:', trigger);
       console.log('Context:', context);
       console.log('===============================');
     }
@@ -212,7 +210,7 @@ export class FormValueSetterAction extends BaseAction {
                   值表达式（支持变量）
                 </div>
                 <Input
-                  placeholder="例如：{{$executor.result.title}} 或 {{$trigger.record.name}}"
+                  placeholder="例如：{{$context.executors[0].data.title}} 或 {{$context.trigger.record.name}}"
                   value={mapping.valueExpression}
                   onChange={(e) => handleMappingChange(index, 'valueExpression', e.target.value)}
                 />
@@ -253,10 +251,10 @@ export class FormValueSetterAction extends BaseAction {
           fontSize: '12px'
         }}>
           <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>支持的变量：</div>
-          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$trigger}}'}</code> - 触发器传入的数据</div>
-          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$executor}}'}</code> - 执行器返回的结果</div>
-          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$system.timestamp}}'}</code> - 当前时间戳</div>
-          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$utils.formatJSON($executor)}}'}</code> - JSON格式化输出</div>
+          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$context.trigger}}'}</code> - 触发器传入的数据</div>
+          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$context.executor}}'}</code> - 执行器返回的结果</div>
+          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{$context.userParams}}'}</code> - 用户参数数据</div>
+          <div>• <code style={{ background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' }}>{'{{JSON.stringify($context.executor)}}'}</code> - JSON格式化输出</div>
         </div>
       </div>
     );

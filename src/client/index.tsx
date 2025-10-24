@@ -11,8 +11,6 @@ import { Plugin } from '@nocobase/client';
 import { initialTrigger } from './trigger/setup';
 import { AutomationManager } from './AutomationManager';
 import { ActionConfigRenderer, ExecutorConfigRenderer } from './Configuration';
-import { ParameterCollectorModal } from './components/ParameterCollectorModal';
-import { AutomationProvider } from './components/AutomationProvider';
 
 // 导出核心模块，方便外部扩展
 export * from './core';
@@ -26,25 +24,21 @@ export * from './AutomationManager';
  * 自动化插件主类
  * 提供完整的自动化框架能力
  */
-export class PluginAutomation extends Plugin {
+export class AutomationPluginClient extends Plugin {
   /**
    * 自动化管理器实例
-   * 其他插件可以通过 usePlugin(PluginAutomation).automationManager 访问
+   * 其他插件可以通过 usePlugin(AutomationPlugin).automationManager 访问
    */
   automationManager = new AutomationManager();
 
   async load() {
     // 初始化触发器系统
     initialTrigger(this.app);
+    
     this.app.addComponents({
       ExecutorConfigRenderer,
       ActionConfigRenderer,
-      ParameterCollectorModal,
-      AutomationProvider,
     });
-    
-    // 添加全局Provider
-    this.app.addProvider(AutomationProvider);
   }
 
   /**
@@ -71,4 +65,4 @@ export class PluginAutomation extends Plugin {
   }
 }
 
-export default PluginAutomation;
+export default AutomationPluginClient;

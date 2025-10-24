@@ -19,20 +19,42 @@ export interface ExecutionContext {
   originalEvent: any;
   /** 时间戳 */
   timestamp: Date;
-  /** 用户参数 - 通过参数构造器收集的用户输入 */
-  userParams?: Record<string, any>;
   
   // 自动化相关的统一上下文数据
   /** 触发器参数和数据 */
   trigger?: any;
-  /** 执行器结果数据 */
-  executor?: any;
+  /** 执行器结果数据 - 按索引存储的数组 */
+  executors?: ExecutorResult[];
   /** 动作配置 */
   config?: any;
+  
+  // UI 能力 - 由框架注入，供需要用户交互的执行器使用
+  /** API 客户端 */
+  apiClient?: any;
   
   /** 其他自定义数据 */
   [key: string]: any;
 }
+
+/**
+ * 执行器结果统一格式
+ */
+export interface ExecutorResult {
+  /** 执行是否成功 */
+  success: boolean;
+  /** 执行结果数据 */
+  data?: any;
+  /** 错误信息（如果失败） */
+  error?: string;
+  /** 执行时间戳 */
+  executedAt: Date;
+  /** 执行器key */
+  executorKey: string;
+    /** 其他元数据 */
+  metadata?: any;
+}
+
+/**
 
 /**
  * 执行器接口定义
@@ -61,7 +83,7 @@ export interface ActionDefinition {
   /** 描述信息 */
   description?: string;
   /** 执行函数 */
-  execute: (triggerParams: any, executorResult: any, context: ExecutionContext) => Promise<void> | void;
+  execute: (trigger: any, context: ExecutionContext) => Promise<void> | void;
   /** 配置组件 - 可选 */
   ConfigComponent?: ComponentType<{ context?: any;value?: any; onChange?: (value: any) => void }>;
 }
@@ -90,13 +112,11 @@ export interface AutomationConfig {
  * 单个事件的配置
  */
 export interface EventConfig {
-  /** 参数构造器配置 */
-  parameterBuilder?: ParameterBuilder;
-  /** 执行器配置 */
-  executor?: {
+  /** 执行器配置列表 - 支持多个执行器按顺序执行 */
+  executors?: Array<{
     key: string;
     params?: any;
-  };
+  }>;
   /** 动作器配置列表 */
   actions: Array<{
     key: string;
@@ -140,18 +160,4 @@ export interface ParameterField {
   placeholder?: string;
   /** 帮助文本 */
   tooltip?: string;
-}
-
-/**
- * 参数构造器配置
- */
-export interface ParameterBuilder {
-  /** 是否启用 */
-  enabled: boolean;
-  /** 字段配置列表 */
-  fields: ParameterField[];
-  /** Modal标题 */
-  title?: string;
-  /** Modal描述 */
-  description?: string;
 }

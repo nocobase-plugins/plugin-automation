@@ -17,14 +17,14 @@ export class ActionRegistry extends BaseRegistry<ActionDefinition> {
   /**
    * 执行指定的动作器
    */
-  async execute(key: string, triggerParams: any, executorResult: any, context: any): Promise<void> {
+  async execute(key: string, trigger: any, context: any): Promise<void> {
     const action = this.get(key);
     if (!action) {
       throw new Error(`Action with key "${key}" not found`);
     }
 
     try {
-      await action.execute(triggerParams, executorResult, context);
+      await action.execute(trigger, context);
       console.log(`Action "${key}" executed successfully`);
     } catch (error) {
       console.error(`Failed to execute action "${key}":`, error);
@@ -37,12 +37,11 @@ export class ActionRegistry extends BaseRegistry<ActionDefinition> {
    */
   async executeMultiple(
     actionKeys: string[], 
-    triggerParams: any, 
-    executorResult: any, 
+    trigger: any, 
     context: any
   ): Promise<void> {
     for (const key of actionKeys) {
-      await this.execute(key, triggerParams, executorResult, context);
+      await this.execute(key, trigger, context);
     }
   }
 }

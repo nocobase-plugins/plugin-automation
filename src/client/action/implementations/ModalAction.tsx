@@ -25,17 +25,13 @@ export class ModalAction extends BaseAction {
   /**
    * 执行 Modal 弹窗
    */
-  execute(triggerParams: any, executorResult: any, context: ExecutionContext): void {
+  execute(trigger: any, context: ExecutionContext): void {
     // 优化：将 triggerParams 和 executorResult 合并到 context 中
     const enrichedContext: ExecutionContext = {
       ...context,
-      trigger: triggerParams,
-      executor: executorResult
+      trigger
     };
     if (!context) return;
-    
-    // 调试信息：显示executorResult结构
-    console.log('ModalAction execute - executorResult:', executorResult);
     
     // 从配置中获取参数
     const config = context.config || {};
@@ -342,13 +338,13 @@ export class ModalAction extends BaseAction {
                 文本内容
               </div>
               <Input.TextArea
-                placeholder="支持变量替换：{{$executor.success}}，{{$trigger.data}}等"
+                placeholder="支持变量替换：{{$context.executors[0].data.success}}，{{$context.trigger.data}}等"
                 value={currentValue.content || ''}
                 onChange={(e) => handleChange('content', e.target.value)}
                 rows={3}
               />
               <div style={{ fontSize: '11px', color: '#999', marginTop: 4 }}>
-                变量语法：{`{{$trigger.*}}`} - 触发器数据，{`{{$executor.*}}`} - 执行器结果，{`{{$context.*}}`} - 执行上下文
+                变量语法：{`{{$context.trigger.*}}`} - 触发器数据，{`{{$context.executors[*].data.*}}`} - 执行器结果，{`{{$context.executors[*].data.*}}`} - 用户参数
               </div>
             </>
           ) : (

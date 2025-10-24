@@ -98,23 +98,22 @@ export class HttpExecutor extends BaseExecutor {
 
       return {
         success: true,
-        response: {
-          status: 200,
-          statusText: 'OK',
-          data: response.data || {},
-          headers: {}
-        },
+        data: response,
         executedAt: new Date(),
         executorKey: this.key,
-        requestConfig
+        metadata: requestConfig
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || error.message,
+        data: error.response ? {
+            status: error.response.status,
+            statusText: error.response.statusText,
+            headers: error.response.headers
+          } : null,
         executedAt: new Date(),
         executorKey: this.key,
-        requestConfig
+        metadata: requestConfig
       };
     }
   }
@@ -224,13 +223,13 @@ export class HttpExecutor extends BaseExecutor {
             URL <span style={{ color: '#ff4d4f' }}>*</span>
           </div>
           <Input.TextArea
-            placeholder="支持变量：https://api.example.com/users/{{$trigger.userId}}"
+            placeholder="支持变量：https://api.example.com/users/{{$context.trigger.userId}}"
             value={currentValue.url || ''}
             onChange={(e) => handleChange('url', e.target.value)}
             rows={2}
           />
           <div style={{ fontSize: '11px', color: '#999', marginTop: 4 }}>
-            支持变量替换：{`{{$trigger.*}}`} - 触发器数据，{`{{$context.*}}`} - 执行上下文，{`{{$utils.formatDate()}}`} - 工具函数
+            支持变量替换：{`{{$context.trigger.*}}`} - 触发器数据，{`{{$context.executors[*].data.*}}`} - 用户参数，{`{{$utils.formatDate()}}`} - 工具函数
           </div>
         </div>
 
@@ -254,7 +253,7 @@ export class HttpExecutor extends BaseExecutor {
                       style={{ width: '30%' }}
                     />
                     <Input
-                      placeholder="支持变量：{{$trigger.token}}"
+                      placeholder="支持变量：{{$context.trigger.token}}"
                       value={header.value || ''}
                       onChange={(e) => handleHeaderChange(index, 'value', e.target.value)}
                       style={{ width: '60%' }}

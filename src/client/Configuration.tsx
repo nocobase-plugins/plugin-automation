@@ -141,12 +141,12 @@ export function Configuration() {
                       [`eventConfig_${event.key}`]: {
                         type: 'object',
                         properties: {
-                          // 参数构造器配置区域
-                          parameterBuilderSection: {
+                          // 执行器配置区域 - 支持多个执行器按顺序执行
+                          executorsSection: {
                             type: 'void',
                             'x-component': 'Card',
                             'x-component-props': {
-                              title: '参数构造器',
+                              title: '执行器配置（支持多个执行器按顺序执行）',
                               size: 'small',
                               style: { 
                                 marginBottom: 24,
@@ -154,9 +154,9 @@ export function Configuration() {
                               },
                             },
                             properties: {
-                              [`parameterBuilderFields_${event.key}`]: {
+                              [`executors_${event.key}`]: {
                                 type: 'array',
-                                title: '参数构造器',
+                                title: '执行器列表',
                                 'x-decorator': 'FormItem',
                                 'x-decorator-props': {
                                   style: { marginTop: 8 },
@@ -194,10 +194,10 @@ export function Configuration() {
                                           type: 'void',
                                           'x-component': 'ArrayItems.SortHandle',
                                         },
-                                        fieldLabelText: {
+                                        executorLabel: {
                                           type: 'void',
                                           'x-component': 'span',
-                                          'x-content': '字段:',
+                                          'x-content': '执行器:',
                                           'x-component-props': {
                                             style: { 
                                               marginRight: 8,
@@ -207,59 +207,7 @@ export function Configuration() {
                                             },
                                           },
                                         },
-                                        fieldLabel: {
-                                          type: 'string',
-                                          'x-decorator': 'FormItem',
-                                          'x-decorator-props': {
-                                            style: { marginBottom: 0 },
-                                          },
-                                          'x-component': 'Input',
-                                          'x-component-props': {
-                                            placeholder: '字段标签',
-                                            style: { minWidth: 120 },
-                                          },
-                                        },
-                                        fieldKeyText: {
-                                          type: 'void',
-                                          'x-component': 'span',
-                                          'x-content': 'Key:',
-                                          'x-component-props': {
-                                            style: { 
-                                              marginLeft: 16,
-                                              marginRight: 8,
-                                              fontWeight: 500,
-                                              color: '#262626',
-                                              lineHeight: '32px',
-                                            },
-                                          },
-                                        },
-                                        fieldKey: {
-                                          type: 'string',
-                                          'x-decorator': 'FormItem',
-                                          'x-decorator-props': {
-                                            style: { marginBottom: 0 },
-                                          },
-                                          'x-component': 'Input',
-                                          'x-component-props': {
-                                            placeholder: '字段Key',
-                                            style: { minWidth: 120 },
-                                          },
-                                        },
-                                        fieldTypeText: {
-                                          type: 'void',
-                                          'x-component': 'span',
-                                          'x-content': '类型:',
-                                          'x-component-props': {
-                                            style: { 
-                                              marginLeft: 16,
-                                              marginRight: 8,
-                                              fontWeight: 500,
-                                              color: '#262626',
-                                              lineHeight: '32px',
-                                            },
-                                          },
-                                        },
-                                        fieldType: {
+                                        key: {
                                           type: 'string',
                                           'x-decorator': 'FormItem',
                                           'x-decorator-props': {
@@ -267,15 +215,15 @@ export function Configuration() {
                                           },
                                           'x-component': 'Select',
                                           'x-component-props': {
-                                            style: { minWidth: 120 },
+                                            placeholder: '请选择执行器',
+                                            style: { minWidth: 200 },
+                                            allowClear: true,
                                           },
-                                          enum: [
-                                            { label: '单行文本', value: 'input' },
-                                            { label: '多行文本', value: 'textarea' },
-                                            { label: '数字', value: 'number' },
-                                            { label: '开关', value: 'switch' },
-                                          ],
-                                          default: 'input',
+                                          enum: availableExecutors.map(executor => ({
+                                            label: executor.label || executor.key,
+                                            value: executor.key,
+                                          })),
+                                          required: true,
                                         },
                                         remove: {
                                           type: 'void',
@@ -283,64 +231,32 @@ export function Configuration() {
                                         },
                                       },
                                     },
+                                    executorConfig: {
+                                      type: 'void',
+                                      'x-component': 'ExecutorConfigRenderer',
+                                      'x-component-props': {
+                                        eventKey: event.key,
+                                        context: { form },
+                                        isMultiple: true,
+                                      },
+                                    },
                                   },
                                 },
                                 properties: {
                                   add: {
                                     type: 'void',
-                                    title: '添加参数字段',
+                                    title: '添加执行器',
                                     'x-component': 'ArrayItems.Addition',
                                     'x-component-props': {
                                       type: 'dashed',
                                       block: true,
                                       size: 'large',
                                       style: {
-                                        borderColor: '#52c41a',
-                                        color: '#52c41a',
+                                        borderColor: '#1890ff',
+                                        color: '#1890ff',
                                       },
                                     },
                                   },
-                                },
-                              },
-                            },
-                          },
-                          // 执行器选择区域
-                          executorSection: {
-                            type: 'void',
-                            'x-component': 'Card',
-                            'x-component-props': {
-                              title: '执行器配置',
-                              size: 'small',
-                              style: { 
-                                marginBottom: 24,
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                              },
-                            },
-                            properties: {
-                              [`executor_${event.key}`]: {
-                                type: 'string',
-                                title: t('Select Executor', { ns: NAMESPACE }),
-                                'x-decorator': 'FormItem',
-                                'x-decorator-props': {
-                                  style: { marginBottom: 8 },
-                                },
-                                'x-component': 'Select',
-                                'x-component-props': {
-                                  placeholder: t('Please select an executor', { ns: NAMESPACE }),
-                                  allowClear: true,
-                                  style: { width: '100%' },
-                                },
-                                enum: availableExecutors.map(executor => ({
-                                  label: executor.label || executor.key,
-                                  value: executor.key,
-                                })),
-                              },
-                              // 执行器配置组件 - 动态渲染
-                              [`executorConfig_${event.key}`]: {
-                                type: 'void',
-                                'x-component': 'ExecutorConfigRenderer',
-                                'x-component-props': {
-                                  eventKey: event.key,
                                 },
                               },
                             },
@@ -498,31 +414,17 @@ export function Configuration() {
           initialValues[`eventConfig_${event.key}`] = {};
           
           if (eventConfig) {
-            // 参数构造器配置
-            if (eventConfig.parameterBuilder && eventConfig.parameterBuilder.fields) {
-              console.log(`原始参数构造器字段:`, JSON.stringify(eventConfig.parameterBuilder.fields, null, 2));
-              // 将保存的字段数据映射回表单字段名称
-              const formFields = eventConfig.parameterBuilder.fields.map((field: any) => ({
-                fieldLabel: field.label || '',
-                fieldKey: field.key || '',
-                fieldType: field.type || 'input',
+            // 执行器配置
+            if (eventConfig.executors && eventConfig.executors.length > 0) {
+              console.log(`原始执行器列表:`, JSON.stringify(eventConfig.executors, null, 2));
+              
+              const executorItems = eventConfig.executors.map((executor: any) => ({
+                key: executor.key,
+                params: executor.params || {},
               }));
-              initialValues[`eventConfig_${event.key}`][`parameterBuilderFields_${event.key}`] = formFields;
-              console.log(`设置参数构造器配置:`, eventConfig.parameterBuilder);
-              console.log(`映射后的表单字段:`, JSON.stringify(formFields, null, 2));
-              console.log(`最终设置的表单路径: eventConfig_${event.key}.parameterBuilderFields_${event.key}`);
-            }
-
-            // 执行器配置 - 从 params 字段中恢复配置
-            if (eventConfig.executor) {
-              console.log(`读取保存的执行器数据:`, JSON.stringify(eventConfig.executor, null, 2));
-              initialValues[`eventConfig_${event.key}`][`executor_${event.key}`] = eventConfig.executor.key;
               
-              // 从 params 字段中读取配置
-              const executorConfig = eventConfig.executor.params || {};
-              
-              initialValues[`eventConfig_${event.key}`][`executorConfig_${event.key}`] = executorConfig;
-              console.log(`设置执行器配置 - key: ${eventConfig.executor.key}, config:`, executorConfig);
+              initialValues[`eventConfig_${event.key}`][`executors_${event.key}`] = executorItems;
+              console.log(`设置执行器配置:`, executorItems);
             }
             
             // 动作器配置 - 从 params 字段中恢复配置
@@ -559,31 +461,14 @@ export function Configuration() {
           
           console.log(`事件 ${event.key} 的表单值:`, JSON.stringify(eventValues, null, 2));
           
-          // 处理参数构造器配置
-          const parameterBuilderFields = eventValues[`parameterBuilderFields_${event.key}`] || [];
-          if (parameterBuilderFields.length > 0) {
-            console.log(`参数构造器字段配置:`, parameterBuilderFields);
-            eventConfig.parameterBuilder = {
-              fields: parameterBuilderFields.map((field: any) => ({
-                label: field.fieldLabel || '',
-                key: field.fieldKey || '',
-                type: field.fieldType || 'input',
-                required: false,
-              })),
-              title: '请输入执行参数',
-            };
-          }
-          
-          // 处理执行器 - 使用不同的字段名避免被过滤
-          const executorKey = eventValues[`executor_${event.key}`];
-          if (executorKey) {
-            const executorConfig = eventValues[`executorConfig_${event.key}`];
-            console.log(`执行器配置 - key: ${executorKey}, config:`, executorConfig);
-            eventConfig.executor = {
-              key: executorKey,
-              // 尝试使用不同的字段名
-              params: executorConfig || {},
-            };
+          // 处理执行器列表
+          const executors = eventValues[`executors_${event.key}`] || [];
+          if (executors.length > 0) {
+            console.log(`执行器列表配置:`, executors);
+            eventConfig.executors = executors.map((executorItem: any) => ({
+              key: executorItem.key,
+              params: executorItem.params || {},
+            }));
           }
           
           // 处理动作器 - 使用不同的字段名避免被过滤
@@ -600,8 +485,8 @@ export function Configuration() {
             });
           }
           
-          // 只有配置了参数构造器、执行器或动作器的事件才保存
-          if (eventConfig.parameterBuilder || eventConfig.executor || (eventConfig.actions && eventConfig.actions.length > 0)) {
+          // 只有配置了执行器或动作器的事件才保存
+          if ((eventConfig.executors && eventConfig.executors.length > 0) || (eventConfig.actions && eventConfig.actions.length > 0)) {
             automationConfig.eventConfigs[event.key] = eventConfig;
           }
         });
@@ -638,68 +523,133 @@ export function Configuration() {
   );
 }
 
-// 执行器配置渲染器组件
-export const ExecutorConfigRenderer: React.FC<{ eventKey: string }> = observer(({ eventKey }) => {
+// 执行器配置渲染器组件 - 支持多执行器和单执行器
+export const ExecutorConfigRenderer: React.FC<{ 
+  eventKey: string; 
+  context?: any; 
+  isMultiple?: boolean;
+}> = observer(({ eventKey, context, isMultiple = false }) => {
   const form = useForm();
   const field = useField();
   
-  // 根据schema结构使用正确的嵌套路径
-  const nestedExecutorFieldName = `eventConfig_${eventKey}.executor_${eventKey}`;
-  const executorKey = form.getValuesIn(nestedExecutorFieldName);
-  
-  console.log('ExecutorConfigRenderer - eventKey:', eventKey, 'executorKey:', executorKey);
-  console.log('ExecutorConfigRenderer - using path:', nestedExecutorFieldName);
-  console.log('ExecutorConfigRenderer - form.values:', form.values);
-  console.log('ExecutorConfigRenderer - eventConfig values:', form.getValuesIn(`eventConfig_${eventKey}`));
-  
-  if (!executorKey) {
-    console.log('No executor selected, not rendering config');
-    return null;
-  }
-  
-  const executor = executorRegistry.get(executorKey);
-  if (!executor || !executor.ConfigComponent) {
-    console.log('Executor not found or no config component:', executorKey);
-    return null;
-  }
-  
-  const ConfigComponent = executor.ConfigComponent;
-  const configFieldName = `eventConfig_${eventKey}.executorConfig_${eventKey}`;
-  
-  console.log('ExecutorConfigRenderer - configFieldName:', configFieldName);
-  console.log('ExecutorConfigRenderer - current config value:', form.getValuesIn(configFieldName));
-  
-  return (
-    <div 
-      style={{ 
-        padding: 16, 
-        backgroundColor: '#f8f9fa',
-        border: '1px solid #dee2e6', 
-        borderRadius: 6,
-        borderLeft: '4px solid #17a2b8',
-      }}
-    >
+  if (isMultiple) {
+    // 多执行器模式：从ArrayItems的context中获取索引
+    const fieldPath = field.address.toString();
+    const pathParts = fieldPath.split('.');
+    const executorIndex = pathParts.findIndex(part => part.match(/^\d+$/));
+    const indexValue = executorIndex >= 0 ? pathParts[executorIndex] : null;
+    
+    if (indexValue === null) {
+      return null;
+    }
+    
+    // 使用正确的嵌套路径获取执行器值
+    const executorKey = form.getValuesIn(`eventConfig_${eventKey}.executors_${eventKey}.${indexValue}.key`);
+    
+    console.log('ExecutorConfigRenderer(Multi) - eventKey:', eventKey, 'indexValue:', indexValue, 'executorKey:', executorKey);
+    
+    if (!executorKey) {
+      console.log('No executor selected for index:', indexValue);
+      return null;
+    }
+    
+    const executor = executorRegistry.get(executorKey);
+    if (!executor || !executor.ConfigComponent) {
+      console.log('Executor not found or no config component:', executorKey);
+      return null;
+    }
+    
+    const ConfigComponent = executor.ConfigComponent;
+    const configFieldName = `eventConfig_${eventKey}.executors_${eventKey}.${indexValue}.params`;
+    
+    console.log('ExecutorConfigRenderer(Multi) - configFieldName:', configFieldName);
+    console.log('ExecutorConfigRenderer(Multi) - current config value:', form.getValuesIn(configFieldName));
+    
+    return (
       <div 
         style={{ 
-          fontSize: '13px', 
-          fontWeight: 500,
-          color: '#495057', 
-          marginBottom: 12,
-          display: 'flex',
-          alignItems: 'center',
+          padding: 16, 
+          backgroundColor: '#f8f9fa',
+          border: '1px solid #dee2e6', 
+          borderRadius: 6,
+          borderLeft: '4px solid #17a2b8',
+          marginTop: 8,
         }}
       >
-        执行器配置选项
+        <div 
+          style={{ 
+            fontSize: '13px', 
+            fontWeight: 500,
+            color: '#495057', 
+            marginBottom: 12,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          {executor.label || executorKey} 配置选项
+        </div>
+        <ConfigComponent 
+          value={form.getValuesIn(configFieldName) || {}} 
+          onChange={(value) => {
+            console.log('ExecutorConfigRenderer(Multi) - setting config value:', value, 'at path:', configFieldName);
+            form.setValuesIn(configFieldName, value);
+          }}
+        />
       </div>
-      <ConfigComponent 
-        value={form.getValuesIn(configFieldName)} 
-        onChange={(value) => {
-          console.log('ExecutorConfigRenderer - setting config value:', value, 'at path:', configFieldName);
-          form.setValuesIn(configFieldName, value);
+    );
+  } else {
+    // 单执行器模式：兼容原有逻辑
+    const nestedExecutorFieldName = `eventConfig_${eventKey}.executor_${eventKey}`;
+    const executorKey = form.getValuesIn(nestedExecutorFieldName);
+    
+    console.log('ExecutorConfigRenderer(Single) - eventKey:', eventKey, 'executorKey:', executorKey);
+    
+    if (!executorKey) {
+      console.log('No executor selected, not rendering config');
+      return null;
+    }
+    
+    const executor = executorRegistry.get(executorKey);
+    if (!executor || !executor.ConfigComponent) {
+      console.log('Executor not found or no config component:', executorKey);
+      return null;
+    }
+    
+    const ConfigComponent = executor.ConfigComponent;
+    const configFieldName = `eventConfig_${eventKey}.executorConfig_${eventKey}`;
+    
+    return (
+      <div 
+        style={{ 
+          padding: 16, 
+          backgroundColor: '#f8f9fa',
+          border: '1px solid #dee2e6', 
+          borderRadius: 6,
+          borderLeft: '4px solid #17a2b8',
         }}
-      />
-    </div>
-  );
+      >
+        <div 
+          style={{ 
+            fontSize: '13px', 
+            fontWeight: 500,
+            color: '#495057', 
+            marginBottom: 12,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          执行器配置选项
+        </div>
+        <ConfigComponent 
+          value={form.getValuesIn(configFieldName)} 
+          onChange={(value) => {
+            console.log('ExecutorConfigRenderer(Single) - setting config value:', value, 'at path:', configFieldName);
+            form.setValuesIn(configFieldName, value);
+          }}
+        />
+      </div>
+    );
+  }
 });
 
 // 动作器配置渲染器组件
