@@ -21,7 +21,7 @@ export abstract class BaseAction implements ActionDefinition {
   /**
    * 动作器实现需要重写此方法
    */
-  abstract execute(triggerParams: any, executorResult: any, context: ExecutionContext): Promise<void> | void;
+  abstract execute(triggerParams: any, context: ExecutionContext): Promise<void> | void;
 
   /**
    * 可选的配置组件
