@@ -10,3 +10,4 @@
 export * from './types';
 export * from './registry';
 export * from './base';
+export * from './EventRegistry';

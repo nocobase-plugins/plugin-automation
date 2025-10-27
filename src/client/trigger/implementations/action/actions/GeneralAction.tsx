@@ -5,8 +5,7 @@ import { useTranslation } from "react-i18next";
 import { NAMESPACE } from "../../../../constant";
 import { Button } from "antd";
 import { useAutomation } from "../../../../hooks/useAutomation";
-import { Configuration } from "../../../../Configuration";
-import { registerAutomationEvents } from "../../../core/EventRegistry";
+import { eventRegistry } from "../../../core/EventRegistry";
 
 const TitleEditor = () => {
     const field = useField();
@@ -101,7 +100,7 @@ const GeneralActionComponent = (props) => {
 };
 
 // 注册组件的自动化事件
-registerAutomationEvents('GeneralActionComponent', [
+eventRegistry.register('GeneralActionComponent', [
     {
         key: 'onClick',
         label: '点击时',
@@ -161,7 +160,7 @@ export function initialGeneralActionTrigger(app: Application) {
             },
             {
                 name: 'customAutomationConfig',
-                Component: Configuration
+                Component: 'AutomationConfiguration'
             },
             {
                 name: 'remove',

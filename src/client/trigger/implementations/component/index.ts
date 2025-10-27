@@ -12,20 +12,19 @@ import { tval } from '@nocobase/utils/client';
 
 import { Text } from './components/Text';
 import { Select } from './components/Select';
-import { registerAutomationEvents } from '../../core/EventRegistry';
-import { Configuration } from '../../../Configuration';
+import { eventRegistry } from '../../core/EventRegistry';
 import { NAMESPACE } from '../../../constant';
 
 export * from './components';
 
 const COMPONENTS = {
-    'AF_Trigger_Text': Text,
-    'AF_Trigger_Select': Select,
+    'Automation_Trigger_Text': Text,
+    'Automation_Trigger_Select': Select,
 };
 
 export function initialComponentTrigger(app: Application) {
     // 注册组件的自动化事件
-    registerAutomationEvents('AF_Trigger_Text', [
+    eventRegistry.register('Automation_Trigger_Text', [
         {
             key: 'onChange',
             label: '值变更时',
@@ -33,7 +32,7 @@ export function initialComponentTrigger(app: Application) {
         }
     ]);
 
-    registerAutomationEvents('AF_Trigger_Select', [
+    eventRegistry.register('Automation_Trigger_Select', [
         {
             key: 'onChange',
             label: '值变更时',
@@ -49,7 +48,7 @@ export function initialComponentTrigger(app: Application) {
             items: [
                 {
                     name: 'customAutomationConfig',
-                    Component: Configuration
+                    Component: 'AutomationConfiguration'
                 }
             ],
         }));
@@ -61,9 +60,9 @@ export function initialComponentTrigger(app: Application) {
     // 为各种字段接口添加自动化组件选项
     const interfaces = ['checkbox', 'checkboxGroup', 'collection', 'color', 'createdAt', 'createdBy', 'date', 'datetime', 'datetimeNoTz', 'email', 'icon', 'id', 'input', 'integer', 'json', 'linkTo', 'm2m', 'm2o', 'markdown', 'multipleSelect', 'nanoid', 'number', 'o2m', 'o2o', 'oho', 'obo', 'password', 'percent', 'phone', 'radioGroup', 'richText', 'select', 'subTable', 'tableoid', 'textarea', 'time', 'unixTimestamp', 'updatedAt', 'updatedBy', 'url', 'uuid'];
     interfaces.forEach((interfaceName) => {
-        let component = 'AF_Trigger_Text';
+        let component = 'Automation_Trigger_Text';
         if (interfaceName === 'select') {
-            component = 'AF_Trigger_Select';
+            component = 'Automation_Trigger_Select';
         }
         app.addFieldInterfaceComponentOption(interfaceName, {
             label: tval('Automation', { ns: NAMESPACE }),

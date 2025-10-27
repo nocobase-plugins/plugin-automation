@@ -64,19 +64,3 @@ class AutomationEventRegistry {
 
 // 导出单例实例
 export const eventRegistry = new AutomationEventRegistry();
-
-/**
- * 便捷的事件注册装饰器/工具函数
- * @param componentName 组件名称
- * @param events 事件列表
- * @returns 装饰器函数
- */
-export function registerAutomationEvents(componentName: string, events: EventDefinition[]) {
-  // 立即注册事件
-  eventRegistry.register(componentName, events);
-  
-  // 返回装饰器函数（可选使用）
-  return function<T extends any>(target: T): T {
-    return target;
-  };
-}

@@ -18,7 +18,7 @@ import { NAMESPACE, SETTINGS_KEY } from './constant';
 import { EventDefinition } from './core/types';
 import { executorRegistry } from './executor';
 import { actionRegistry } from './action';
-import { eventRegistry } from './trigger/core/EventRegistry';
+import { eventRegistry } from './trigger';
 
 export function Configuration() {
   const { dn } = useDesignable();

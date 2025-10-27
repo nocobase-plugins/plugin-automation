@@ -5,8 +5,7 @@ import { useTranslation } from "react-i18next";
 import { NAMESPACE } from "../../../../constant";
 import { Button, Typography } from "antd";
 import { useAutomation } from "../../../../hooks/useAutomation";
-import { Configuration } from "../../../../Configuration";
-import { registerAutomationEvents } from "../../../core/EventRegistry";
+import { eventRegistry } from "../../../core/EventRegistry";
 
 const tableOpActionSettings = new SchemaSettings({
     name: 'actionSettings:tableOpAction',
@@ -60,7 +59,7 @@ const tableOpActionSettings = new SchemaSettings({
         },
         {
             name: 'customAutomationConfig',
-            Component: Configuration
+            Component: 'AutomationConfiguration'
         },
         {
             name: 'remove',
@@ -167,7 +166,7 @@ const TableOpActionComponent: TableOpActionComponentType = (props) => {
 };
 
 // 注册组件的自动化事件
-registerAutomationEvents('TableOpActionComponent', [
+eventRegistry.register('TableOpActionComponent', [
     {
         key: 'onClick',
         label: '点击时',

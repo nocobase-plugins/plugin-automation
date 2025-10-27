@@ -8,6 +8,7 @@
  */
 
 import { triggerRegistry } from './trigger/core/registry';
+import { eventRegistry } from './trigger/core/EventRegistry';
 import { executorRegistry } from './executor/core/registry';
 import { actionRegistry } from './action/core/registry';
 import { TriggerComponent } from './trigger/core/types';
@@ -30,6 +31,7 @@ export class AutomationManager {
        */
       register: (component: TriggerComponent) => {
         triggerRegistry.register(component);
+        eventRegistry.register(component.key, component.getSupportedEvents());
       },
 
       /**

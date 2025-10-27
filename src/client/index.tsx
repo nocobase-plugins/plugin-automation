@@ -10,7 +10,7 @@
 import { Plugin } from '@nocobase/client';
 import { initialTrigger } from './trigger/setup';
 import { AutomationManager } from './AutomationManager';
-import { ActionConfigRenderer, ExecutorConfigRenderer } from './Configuration';
+import { Configuration as AutomationConfiguration, ActionConfigRenderer, ExecutorConfigRenderer } from './Configuration';
 
 // 导出核心模块，方便外部扩展
 export * from './core';
@@ -19,6 +19,7 @@ export * from './action';
 export * from './trigger';
 export * from './hooks';
 export * from './AutomationManager';
+export * from './Configuration';
 
 /**
  * 自动化插件主类
@@ -36,6 +37,7 @@ export class AutomationPluginClient extends Plugin {
     initialTrigger(this.app);
     
     this.app.addComponents({
+      AutomationConfiguration,
       ExecutorConfigRenderer,
       ActionConfigRenderer,
     });
