@@ -29,6 +29,12 @@ export function initialComponentTrigger(app: Application) {
             key: 'onChange',
             label: '值变更时',
             description: '当输入框的值发生变化时触发'
+        },
+        {
+            key: 'onClick',
+            label: '值点击时',
+            readOnly: true,
+            description: '当值被点击时触发'
         }
     ]);
 
@@ -37,6 +43,12 @@ export function initialComponentTrigger(app: Application) {
             key: 'onChange',
             label: '值变更时',
             description: '当选择项发生变化时触发'
+        },
+        {
+            key: 'onClick',
+            label: '值点击时',
+            readOnly: true,
+            description: '当值被点击时触发'
         }
     ]);
 

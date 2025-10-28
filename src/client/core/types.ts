@@ -98,6 +98,8 @@ export interface EventDefinition {
   label: string;
   /** 描述信息 */
   description?: string;
+  /** 是否只读模式事件 */
+  readOnly?: boolean;
 }
 
 /**

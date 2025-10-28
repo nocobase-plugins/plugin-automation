@@ -9,6 +9,7 @@
 
 export * from './ConsoleAction';
 export * from './MessageAction';
+export { OpenLinkAction } from './OpenLinkAction';
 export { PopoverAction } from './PopoverAction';
 export { ModalAction } from './ModalAction';
 export { FormValueSetterAction } from './FormValueSetterAction';

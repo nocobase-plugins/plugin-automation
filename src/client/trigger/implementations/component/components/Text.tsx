@@ -8,7 +8,7 @@
  */
 
 import { connect, mapReadPretty } from "@formily/react";
-import { Input } from "antd";
+import { Input, Typography } from "antd";
 import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useAutomation } from "../../../../hooks/useAutomation";
 
@@ -72,7 +72,18 @@ const TextEditable: FC<any> = ({ value, disabled, onChange, ...otherProps }) => 
 
 const TextReadPretty: FC<any> = ({ value, ...otherProps }) => {
     if (!value) return null;
-    return <Input value={value} {...otherProps} />;
+    const { trigger } = useAutomation();
+    const [isExecuting, setIsExecuting] = useState(false);
+    return <Typography.Link {...otherProps} disabled={isExecuting} onClick={async (e) => {
+        setIsExecuting(true);
+        try {
+            await trigger('', 'onClick', { rawEvent: e, value });
+        } catch (error) {
+            console.error('Text automation execution failed:', error);
+        } finally {
+            setIsExecuting(false);
+        }
+    }}>{value + `${isExecuting ? ' (执行中...)' : ''}`}</Typography.Link>;
 }
 
 // 创建基础组件

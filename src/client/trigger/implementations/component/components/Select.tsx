@@ -1,5 +1,5 @@
 import { connect, mapReadPretty, useField } from "@formily/react";
-import { Input, Select as AntdSelect } from "antd";
+import { Input, Select as AntdSelect, Typography } from "antd";
 import React, { FC, useState } from "react";
 import { useAutomation } from "../../../../hooks/useAutomation";
 
@@ -55,7 +55,18 @@ const SelectReadPretty: FC<any> = ({ value, ...otherProps }) => {
     if (!value) return null;
     const field = useField();
     const { label } = useSelectValue(field, value);
-    return <Input value={label} {...otherProps} />;
+    const { trigger } = useAutomation();
+    const [isExecuting, setIsExecuting] = useState(false);
+    return <Typography.Text {...otherProps} disabled={isExecuting} onClick={async (e) => {
+        setIsExecuting(true);
+        try {
+            await trigger('', 'onClick', { rawEvent: e, value });
+        } catch (error) {
+            console.error('Select automation execution failed:', error);
+        } finally {
+            setIsExecuting(false);
+        }
+    }}>{label + `${isExecuting ? ' (执行中...)' : ''}`}</Typography.Text>;
 }
 
 // 创建基础组件

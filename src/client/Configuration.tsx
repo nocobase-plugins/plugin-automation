@@ -24,8 +24,21 @@ export function Configuration() {
   const { dn } = useDesignable();
   const { t } = useTranslation();
   const form = useForm();
+  const field = useField();
   const fieldSchema = useFieldSchema();
   const fieldComponentName = useFieldComponentName();
+
+  let resultSchema = null;
+  let isFieldReadPretty = true;
+
+  if (field.componentType === 'TableV2.Column') {
+    // column field
+    resultSchema = Object.values(fieldSchema.properties)[0];
+    isFieldReadPretty = resultSchema['x-read-pretty'] ?? false;
+  } else {
+    resultSchema = fieldSchema;
+    isFieldReadPretty = field?.readPretty ?? false;
+  }
   
   const components = useContext(SchemaComponentsContext);
   const component = FormPath.getIn(components, fieldComponentName);
@@ -33,14 +46,14 @@ export function Configuration() {
   // 调试信息
   console.log('=== 配置组件调试信息 ===');
   console.log('fieldComponentName:', fieldComponentName);
-  console.log('fieldSchema x-component:', fieldSchema?.['x-component']);
+  console.log('fieldSchema x-component:', resultSchema?.['x-component']);
   console.log('FormPath component type:', typeof component);
   console.log('components context available:', !!components);
   console.log('total registered components:', Object.keys(components || {}).length);
   
   // 统一的自动化事件检测逻辑 - 使用事件注册中心
   const getComponentEvents = (): EventDefinition[] => {
-    const schemaComponent = fieldSchema?.['x-component'];
+    const schemaComponent = resultSchema?.['x-component'];
     
     console.log('=== 统一事件检测 ===');
     console.log('Schema组件:', schemaComponent);
@@ -62,7 +75,7 @@ export function Configuration() {
     
     if (events.length > 0) {
       console.log(`✓ 找到组件事件: ${targetComponent}`, events);
-      return events;
+      return events.filter(event => isFieldReadPretty ? event.readOnly : !event.readOnly);
     } else {
       console.log(`✗ 组件 "${targetComponent}" 未注册自动化事件`);
       console.log('已注册的组件:', eventRegistry.getAllComponents());
@@ -418,9 +431,9 @@ export function Configuration() {
       }
       initialValues={useMemo(() => {
         console.log('=== useMemo 被触发 ===');
-        console.log('fieldSchema:', fieldSchema);
+        console.log('fieldSchema:', resultSchema);
         // 使用标准的 x-component-props 存储配置
-        const componentProps = fieldSchema?.['x-component-props'] || {};
+        const componentProps = resultSchema?.['x-component-props'] || {};
         console.log('fieldSchema[x-component-props] 完整内容:', JSON.stringify(componentProps, null, 2));
         
         const currentConfig = componentProps?.automationConfiguration || { eventConfigs: {} };
@@ -473,12 +486,12 @@ export function Configuration() {
         
         console.log('最终初始值:', initialValues);
         return initialValues;
-      }, [componentEvents, fieldSchema])}
+      }, [componentEvents, resultSchema])}
       onSubmit={(values) => {
         console.log('=== 保存时表单值调试 ===');
         
         // 构建自动化配置 - 基于现有配置，不要覆盖其他事件的配置
-        const currentConfig = fieldSchema?.[SETTINGS_KEY] || { eventConfigs: {} };
+        const currentConfig = resultSchema?.[SETTINGS_KEY] || { eventConfigs: {} };
         const automationConfig = {
           eventConfigs: { ...currentConfig.eventConfigs } as any,
         };
@@ -524,16 +537,16 @@ export function Configuration() {
         console.log('最终保存配置:', JSON.stringify(automationConfig, null, 2));
         
         // 使用标准的 x-component-props 存储配置
-        const componentProps = fieldSchema['x-component-props'] || {};
+        const componentProps = resultSchema['x-component-props'] || {};
         console.log('保存前 fieldSchema[x-component-props] 状态:', JSON.stringify(componentProps, null, 2));
         
         componentProps.automationConfiguration = automationConfig;
-        fieldSchema['x-component-props'] = componentProps;
+        resultSchema['x-component-props'] = componentProps;
         console.log('保存后 fieldSchema[x-component-props] 状态:', JSON.stringify(componentProps, null, 2));
         
         dn.emit('patch', {
           schema: {
-            ['x-uid']: fieldSchema['x-uid'],
+            ['x-uid']: resultSchema['x-uid'],
             'x-component-props': componentProps,
           },
         });
